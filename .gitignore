@@ -1,0 +1,7 @@
+*.ncb
+Debug
+Release
+PSMAGE/Release
+PSMAGE/Debug
+PSMAGE/PSMAGE.vcproj.*
+*.suo
