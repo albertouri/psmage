@@ -6,6 +6,8 @@
 class RenderArea;
 class QLabel;
 class QSpinBox;
+class QPushButton;
+class QLineEdit;
 
 class Window : public QWidget
 {
@@ -16,15 +18,16 @@ public:
 
 private slots:
 	void regionsChanged();
+	void generateTXT();
 
 private:
 	RenderArea *renderArea;
-	QLabel *mapWLabel;
-	QSpinBox *mapWidthSpinBox;
-	QLabel *mapHLabel;
-	QSpinBox *mapHeightSpinBox;
+	QLabel *mapSizeLabel;
+	QSpinBox *mapSizeBox;
 	QLabel *regionsLabel;
 	QSpinBox *regionsSpinBox;
+	QPushButton *toTxtButton;
+	QPushButton *generateRegionsButton;
 };
 
 #endif // WINDOW_H
