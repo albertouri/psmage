@@ -4,12 +4,14 @@
 #include "Voronoi.h"
 #include "VPoint.h"
 
+#include <fstream>
+
 RenderArea::RenderArea(QWidget *parent)
 :	QWidget(parent)
 {
-	mapWidth = 600;
-	mapHeight = 600;
-	numRegions = 10;
+	mapWidth = 20;
+	mapHeight = 20;
+	numRegions = 2;
 
 	v = new vor::Voronoi();
 	ver = new vor::Vertices();
@@ -26,17 +28,30 @@ RenderArea::RenderArea(QWidget *parent)
 
 QSize RenderArea::minimumSizeHint() const
 {
-	return QSize(mapWidth, mapHeight);
+	return QSize(600, 600);
+	//return QSize(mapWidth, mapHeight);
 }
 
 QSize RenderArea::sizeHint() const
 {
-	return QSize(mapWidth, mapHeight);
+	return QSize(600, 600);
+	//return QSize(mapWidth, mapHeight);
 }
 
-int RenderArea::getMaxRegions() const
+int RenderArea::getMapSize() const
 {
-	return maxRegions;
+	return mapHeight;
+}
+
+void RenderArea::setMapSize(int size)
+{
+	mapWidth = size;
+	mapHeight = size;
+}
+
+int RenderArea::getNumRegions() const
+{
+	return numRegions;
 }
 
 void RenderArea::setNumRegions(int numRegions)
@@ -57,31 +72,58 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 	QPoint points[maxRegions];
 	int j = 0;
 	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i) {
-		points[j] = QPoint((*i)->x, (*i)->y);
+		points[j] = QPoint((*i)->x*(600/mapWidth), (*i)->y*(600/mapWidth));
 		j++;
 	}
 
 	QPainter painter(this);
-	//painter.setPen(QPen(Qt::blue, 5));
-	//painter.setBrush(brush);
-	//if (antialiased)
-	//	painter.setRenderHint(QPainter::Antialiasing, true);
 
-	//painter.save();
+	// Draw mark
+	painter.setPen(palette().dark().color());
+	painter.drawRect(QRect(0, 0, width()-1, height()-1));
+
 	// Draw Random Points
-	painter.setPen(QPen(Qt::blue, 5));
+	painter.setPen(QPen(Qt::blue, 3));
 	painter.drawPoints(points, numRegions);
 
+	painter.scale(600/mapWidth, 600/mapHeight);
 	// Draw Voronoi Edges
 	painter.setPen(palette().dark().color());
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
 		painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
 	}
-	//painter.restore();
+
+}
+
+void RenderArea::generateTXT()
+{
+	// Paint ******
+	// Color brushes
+	QColor *Qblack = new QColor(Qt::black);
+	QImage myQImage(mapWidth, mapHeight, QImage::Format_RGB32);
+	QPainter painter(&myQImage);
+	// Set background
+	painter.fillRect(0, 0, mapWidth, mapHeight, Qt::white);
+	// Draw Voronoi Edges
+	painter.setBrush(Qt::black);
+	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
+		painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
+	}
+	painter.end();
 
 
-	//painter.setPen(palette().dark().color());
-	//painter.setBrush(Qt::NoBrush);
-
-	painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
+	// Print TXT ************
+	QColor *color = new QColor;
+	std::ofstream fileTxt("map.txt");
+	for (int i=0; i<mapWidth; i++) {
+		for (int j=0; j<mapHeight; j++) {
+			color->setRgb(myQImage.pixel(j,i));
+			if (color->name() == Qblack->name())
+				fileTxt << 1;
+			else
+				fileTxt << 0;
+		}
+		fileTxt << std::endl;
+	}
+	fileTxt.close();
 }
