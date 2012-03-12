@@ -13,13 +13,14 @@ height = 128
 vcod = (File.open('vcod.bin', 'rb')).read
 puni = []; 5700.times { |x| puni << 1 }
 unit = []; #214 (int) is starting location
-isom = []; # (width/2 + 1) * (height+1) * 4, 16 int
+isom = []; ((width/2 + 1)*(height+1)*4).times { |x| isom << 16 }
 tile = []; 4096.times { |x| tile << 1 } # w*h * 2 (because ints), one int per tile
 mask = []; (width*height).times { |x| mask << 255 }
 str  = []; str << 1024; 1024.times { |x| str << 0 }
 uprp = []; 1280.times { |x| uprp << 0 }
 upus = []; 64.times { |x| upus << 0 }
 mrgn = []; 5100.times { |x| mrgn << 0 }
+trig = []; 7200.times { |x| trig << 0 } #???
 forc = []; 20.times { |x| forc << 0 }
 wav  = []; 1024.times { |x| wav << 0 }
 swnm = []; 256.times { |x| swnm << 0 }
@@ -58,6 +59,8 @@ sections = [
   { 'name'=> 'PUNI', 'length'=>5700,   'val'=> puni, 'type'=>'bytes' },
   # Flags and stats of each unit on the map (only starting locations for this)
   { 'name'=> 'UNIT', 'length'=>72,     'val'=> unit, 'type'=>'chars' },
+  # ISOM, maps isometric view in Staredit, other maps are all 16?
+  { 'name'=> 'ISOM', 'length'=>isom.length*2, 'val'=>isom, 'type'=>'int' },
   # Tile map of level's terrain 
   { 'name'=> 'TILE', 'length'=>tile.length * 2, 'val'=> tile, 'type'=>'int' },
   # Doodad map of level (not using)
@@ -75,7 +78,7 @@ sections = [
   # MRGN Locations, docs say 256 locations, maps actually have 255
   { 'name'=> 'MRGN',  'length'=>mrgn.length, 'val' => mrgn, 'type'=>'bytes' },
   # TRIG
-  # 
+  { 'name' => 'TRIG', 'length'=>trig.length, 'val' => trig, 'type'=>'bytes' },
   # Mission briefing section
   { 'name'=>'MBRF', 'length'=>0, 'val'=>'', 'type'=>'chars' },
   # Connect scenario properties to strings (pointing to null strings in STR)
