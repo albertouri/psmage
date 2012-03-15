@@ -18,6 +18,7 @@ public:
 
 private slots:
 	void generateRegions();
+	void generateElevations();
 	void generateTXT();
 
 private:
@@ -28,6 +29,7 @@ private:
 	QSpinBox *regionsSpinBox;
 	QPushButton *toTxtButton;
 	QPushButton *generateRegionsButton;
+	QPushButton *genElevationsButton;
 };
 
 #endif // WINDOW_H

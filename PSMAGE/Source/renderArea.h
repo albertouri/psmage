@@ -10,7 +10,7 @@
 #include "VPoint.h"
 #include <map>
 
-typedef std::set<Region*> RegionSet;
+typedef std::vector<Region*> RegionSet;
 typedef std::map<VPoint *,Region *> PointToRegionMap;
 
 typedef int OutCode;
@@ -38,6 +38,7 @@ public:
 
 public slots:
 	void generateRegions(int size, int numRegions);
+	void generateElevations();
 	void generateTXT();
 
 protected:
@@ -59,6 +60,7 @@ private:
 	int numRegions;
 	int mapWidth;
 	int mapHeight;
+	bool elevations;
 
 	void generateVoroni();
 	OutCode computeOutCode(VPoint *p1);

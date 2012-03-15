@@ -12,6 +12,7 @@ RenderArea::RenderArea(QWidget *parent)
 	mapWidth = 200;
 	mapHeight = 200;
 	numRegions = 10;
+	elevations = FALSE;
 
 	v = new vor::Voronoi();
 	ver = new vor::Vertices();
@@ -31,7 +32,7 @@ void RenderArea::generateVoroni()
 		VPoint *seed = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
 		ver->push_back(seed);
 		Region *newRegion = new Region(seed);
-		regions.insert(newRegion);
+		regions.push_back(newRegion);
 		pointsToRegion.insert(PointToRegionMap::value_type(seed, newRegion));
 	}
 	// Generate Voronoi edges
@@ -237,8 +238,33 @@ void RenderArea::generateRegions(int size, int numRegions)
 	this->mapWidth = size;
 	this->mapHeight = size;
 	delete ver;
+	elevations = FALSE;
 	ver = new vor::Vertices();
 	generateVoroni();
+	update();
+}
+
+void RenderArea::generateElevations()
+{
+	elevations = TRUE;
+	// reset all elevations info
+	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
+		(*i)->elevation = 1;
+	}
+
+	// % of hills
+	int percentHills = 50;
+	int totalHills = (percentHills*numRegions)/100;
+	int hillRegions = 0;
+	while(hillRegions <= totalHills) {
+		int regionID = int(regions.size() * (double)rand()/(double)RAND_MAX);
+		//if ( !(regions[regionID]->minXborderMap && regions[regionID]->minYborderMap) ||
+		//	!(regions[regionID]->maxXborderMap && regions[regionID]->maxYborderMap) ) {
+			regions[regionID]->elevation = 2;
+			hillRegions++;
+		//}
+	}
+
 	update();
 }
 
@@ -257,16 +283,34 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 	//painter.setPen(palette().dark().color());
 	//painter.drawRect(QRect(0, 0, width()-1, height()-1));
 
-	// Draw Random Points
-	painter.setPen(QPen(Qt::blue, 3));
-	painter.drawPoints(points, numRegions);
-
 	painter.scale(600/mapWidth, 600/mapHeight);
-	// Draw Voronoi Edges
-	painter.setPen(QPen(Qt::red, 0));
-	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
-		painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
+
+	// Draw Regions
+	if (elevations) {
+		for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
+			painter.setPen(QPen(Qt::green, 0));
+			painter.setBrush(Qt::green);
+			if ((*i)->elevation == 2) {
+				painter.setBrush(Qt::yellow);
+				painter.setPen(QPen(Qt::yellow, 0));
+			}
+			QPoint polyPoints[99];  // TODO better use of memory
+			int k = 0;
+			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+				// TODO trying to sort points properly
+				polyPoints[k] = QPoint((*j)->start->x, (*j)->start->y); ++k;
+				polyPoints[k] = QPoint((*j)->end->x, (*j)->end->y); ++k;
+			}
+			painter.drawPolygon(polyPoints, (*i)->borders.size()*2); //TODO use k value
+		}
 	}
+
+
+	// Draw Voronoi Edges
+	//painter.setPen(QPen(Qt::red, 0));
+	//for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
+	//	painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
+	//}
 	painter.setPen(palette().dark().color());
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
 		for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
@@ -274,6 +318,11 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 			painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
 		}
 	}
+
+	painter.resetTransform();
+	// Draw Random Points
+	painter.setPen(QPen(Qt::blue, 3));
+	painter.drawPoints(points, numRegions);
 
 }
 

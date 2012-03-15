@@ -22,30 +22,38 @@ Window::Window()
 
 	toTxtButton = new QPushButton(tr("Generate TXT Map"));
 	generateRegionsButton = new QPushButton(tr("Generate Regions"));
+	genElevationsButton = new QPushButton(tr("Generate Elevations"));
 
 	// Connections
 	//connect(regionsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(regionsChanged()));
 	connect(toTxtButton, SIGNAL(clicked()), this, SLOT(generateTXT()));
 	connect(generateRegionsButton, SIGNAL(clicked()), this, SLOT(generateRegions()));
+	connect(genElevationsButton, SIGNAL(clicked()), this, SLOT(generateElevations()));
 
 	// Layout
 	QGridLayout *mainLayout = new QGridLayout;
-	mainLayout->addWidget(renderArea, 0, 2, 5, 1);
+	mainLayout->addWidget(renderArea, 0, 2, 6, 1);
 	mainLayout->addWidget(mapSizeLabel, 0, 0, Qt::AlignRight);
 	mainLayout->addWidget(mapSizeBox, 0, 1);
 	mainLayout->addWidget(regionsLabel, 1, 0, Qt::AlignRight);
 	mainLayout->addWidget(regionsSpinBox, 1, 1);
 	mainLayout->addWidget(generateRegionsButton, 2, 0, 1, 2);
-	mainLayout->addWidget(toTxtButton, 3, 0, 1, 2);
-	mainLayout->setRowStretch(4, 50);
+	mainLayout->addWidget(genElevationsButton, 3, 0, 1, 2);
+	mainLayout->addWidget(toTxtButton, 4, 0, 1, 2);
+	mainLayout->setRowStretch(5, 50);
 	setLayout(mainLayout);
 
-	setWindowTitle(tr("Basic Voronoi"));
+	setWindowTitle(tr("Procedural Starcraft MAp GEnerator"));
 }
 
 void Window::generateRegions()
 {
 	renderArea->generateRegions(mapSizeBox->value(), regionsSpinBox->value());
+}
+
+void Window::generateElevations()
+{
+	renderArea->generateElevations();
 }
 
 void Window::generateTXT()

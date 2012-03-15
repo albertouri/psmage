@@ -17,6 +17,7 @@ public:
 	bool maxXborderMap;
 	bool minYborderMap;
 	bool maxYborderMap;
+	short int elevation; // 0=water, 1=normal, 2=hill
 
 	Region(VPoint * s)
 	{
@@ -25,6 +26,7 @@ public:
 		maxXborderMap = FALSE;
 		minYborderMap = FALSE;
 		maxYborderMap = FALSE;
+		elevation = 1;
 	}
 
 	~Region()
