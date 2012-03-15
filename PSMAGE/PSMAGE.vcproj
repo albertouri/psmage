@@ -329,6 +329,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Region.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\renderArea.cpp"
 				>
 			</File>

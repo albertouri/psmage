@@ -54,6 +54,18 @@ public:
 		direction = new VPoint(b->y - a->y, -(b->x - a->x));
 	}
 
+	VEdge(VPoint * s, VPoint * e)
+	{
+		start		= s;
+		left		= 0;
+		right		= 0;
+		neighbour	= 0;
+		end			= e;
+		f			= 0;
+		g			= 0;
+		direction	= 0;
+	}
+
 	/*
 		Destructor of the class
 		direction belongs only to the current edge, other pointers can be shared by other edges

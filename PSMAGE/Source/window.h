@@ -17,7 +17,7 @@ public:
 	Window();
 
 private slots:
-	void regionsChanged();
+	void generateRegions();
 	void generateTXT();
 
 private:

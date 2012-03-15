@@ -6,6 +6,20 @@
 #include <QWidget>
 
 #include "Voronoi.h"
+#include "Region.h"
+#include "VPoint.h"
+#include <map>
+
+typedef std::set<Region*> RegionSet;
+typedef std::map<VPoint *,Region *> PointToRegionMap;
+
+typedef int OutCode;
+
+const int INSIDE = 0; // 0000
+const int LEFT = 1;   // 0001
+const int RIGHT = 2;  // 0010
+const int BOTTOM = 4; // 0100
+const int TOP = 8;    // 1000
 
 class RenderArea : public QWidget
 {
@@ -23,8 +37,7 @@ public:
 	int getMapSize() const;
 
 public slots:
-	void setMapSize(int size);
-	void setNumRegions(int numRegions);
+	void generateRegions(int size, int numRegions);
 	void generateTXT();
 
 protected:
@@ -35,10 +48,21 @@ private:
 	vor::Voronoi * v;
 	vor::Vertices * ver;
 	vor::Edges * edg;
+	RegionSet regions;
+	PointToRegionMap pointsToRegion;
+
+	vor::Vertices x0edges; // contains tuple of elements P1 and P2 of an edge (where P1 is on x0edge)
+	vor::Vertices xMaxedges;
+	vor::Vertices y0edges;
+	vor::Vertices yMaxedges;
 
 	int numRegions;
 	int mapWidth;
 	int mapHeight;
+
+	void generateVoroni();
+	OutCode computeOutCode(VPoint *p1);
+	void clipping(VPoint *p1, VPoint *p2);
 };
 
 #endif

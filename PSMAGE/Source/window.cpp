@@ -9,6 +9,7 @@ Window::Window()
 	renderArea = new RenderArea;
 
 	mapSizeBox = new QSpinBox;
+	mapSizeBox->setRange(50, 500);
 	mapSizeBox->setValue(renderArea->getMapSize());
 	mapSizeLabel = new QLabel(tr("Map size:"));
 	mapSizeLabel->setBuddy(mapSizeBox);
@@ -25,7 +26,7 @@ Window::Window()
 	// Connections
 	//connect(regionsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(regionsChanged()));
 	connect(toTxtButton, SIGNAL(clicked()), this, SLOT(generateTXT()));
-	connect(generateRegionsButton, SIGNAL(clicked()), this, SLOT(regionsChanged()));
+	connect(generateRegionsButton, SIGNAL(clicked()), this, SLOT(generateRegions()));
 
 	// Layout
 	QGridLayout *mainLayout = new QGridLayout;
@@ -42,10 +43,9 @@ Window::Window()
 	setWindowTitle(tr("Basic Voronoi"));
 }
 
-void Window::regionsChanged()
+void Window::generateRegions()
 {
-	renderArea->setMapSize(mapSizeBox->value());
-	renderArea->setNumRegions(regionsSpinBox->value());
+	renderArea->generateRegions(mapSizeBox->value(), regionsSpinBox->value());
 }
 
 void Window::generateTXT()

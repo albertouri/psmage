@@ -18,7 +18,8 @@ namespace vor
 		Useful data containers for Vertices (places) and Edges of Voronoi diagram
 	*/
 
-	typedef std::list<VPoint *>		Vertices	;
+	//typedef std::list<VPoint *>		Vertices	;
+	typedef std::vector<VPoint *>		Vertices	;
 	typedef std::list<VEdge *>		Edges		;
 
 	/*
@@ -74,7 +75,8 @@ namespace vor
 		*/
 
 		std::set<VEvent *>	deleted;
-		std::list<VPoint *> points;
+		//std::list<VPoint *> points;
+		std::vector<VPoint *> points;
 		std::priority_queue<VEvent *, std::vector<VEvent *>, VEvent::CompareEvent> queue;
 
 		/*
