@@ -1,0 +1,9 @@
+.DS_Store
+*.tcp
+*.tps
+*.synctex.gz
+*.log
+*.aux
+*.bbl
+*.blg
+*.pdf
