@@ -39,6 +39,7 @@ public:
 public slots:
 	void generateRegions(int size, int numRegions);
 	void generateElevations();
+	void mirroringMap();
 	void generateTXT();
 
 protected:
@@ -61,6 +62,7 @@ private:
 	int mapWidth;
 	int mapHeight;
 	bool elevations;
+	bool mapMirrored;
 
 	void generateVoroni();
 	OutCode computeOutCode(VPoint *p1);

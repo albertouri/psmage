@@ -19,6 +19,7 @@ public:
 private slots:
 	void generateRegions();
 	void generateElevations();
+	void mirroring();
 	void generateTXT();
 
 private:
@@ -30,6 +31,7 @@ private:
 	QPushButton *toTxtButton;
 	QPushButton *generateRegionsButton;
 	QPushButton *genElevationsButton;
+	QPushButton *mirroringButton;
 };
 
 #endif // WINDOW_H

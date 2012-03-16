@@ -15,6 +15,7 @@ RenderArea::RenderArea(QWidget *parent)
 	mapHeight = 200;
 	numRegions = 10;
 	elevations = FALSE;
+	mapMirrored = FALSE;
 
 	v = new vor::Voronoi();
 	ver = new vor::Vertices();
@@ -246,6 +247,7 @@ void RenderArea::generateRegions(int size, int numRegions)
 	this->mapHeight = size;
 	delete ver;
 	elevations = FALSE;
+	mapMirrored = FALSE;
 	ver = new vor::Vertices();
 	generateVoroni();
 	update();
@@ -253,6 +255,7 @@ void RenderArea::generateRegions(int size, int numRegions)
 
 void RenderArea::generateElevations()
 {
+	mapMirrored = FALSE;
 	elevations = TRUE;
 	// reset all elevations info
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
@@ -275,22 +278,76 @@ void RenderArea::generateElevations()
 	update();
 }
 
+void RenderArea::mirroringMap()
+{
+	if (!mapMirrored) {
+		mapMirrored = TRUE;
+
+		// Mirroring Y axis
+		RegionSet yRegions;
+		// hard copy 
+		for (RegionSet::iterator i=regions.begin();i!=regions.end();++i)  {
+			Region *newRegion = new Region(**i);
+			newRegion->seed = new VPoint(*(*i)->seed);
+			vor::Edges::iterator o = (*i)->borders.begin();
+			for(vor::Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
+				(*j) = new VEdge(**o);
+				(*j)->start = new VPoint(*(*o)->start);
+				(*j)->end = new VPoint(*(*o)->end);
+			}
+			yRegions.push_back(newRegion);
+		}
+		for(RegionSet::iterator i = yRegions.begin(); i!= yRegions.end(); ++i) {
+			(*i)->seed->y = (mapHeight*2)-(*i)->seed->y;
+			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+				(*j)->start->y = (mapHeight*2)-(*j)->start->y;
+				(*j)->end->y = (mapHeight*2)-(*j)->end->y;
+			}
+		}
+		// concatenate vectors
+		regions.insert( regions.end(), yRegions.begin(), yRegions.end() );
+
+		// Mirroring X axis
+		RegionSet xRegions;
+		// hard copy 
+		for (RegionSet::iterator i=regions.begin();i!=regions.end();++i)  {
+			Region *newRegion = new Region(**i);
+			newRegion->seed = new VPoint(*(*i)->seed);
+			vor::Edges::iterator o = (*i)->borders.begin();
+			for(vor::Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
+				(*j) = new VEdge(**o);
+				(*j)->start = new VPoint(*(*o)->start);
+				(*j)->end = new VPoint(*(*o)->end);
+			}
+			xRegions.push_back(newRegion);
+		}
+		for(RegionSet::iterator i = xRegions.begin(); i!= xRegions.end(); ++i) {
+			(*i)->seed->x = (mapWidth*2)-(*i)->seed->x;
+			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+				(*j)->start->x = (mapWidth*2)-(*j)->start->x;
+				(*j)->end->x = (mapWidth*2)-(*j)->end->x;
+			}
+		}
+		// concatenate vectors
+		regions.insert( regions.end(), xRegions.begin(), xRegions.end() );
+
+		update();
+	}
+}
+
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
-	QPoint points[maxRegions];
-	int j = 0;
-	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i) {
-		points[j] = QPoint((*i)->x*(600/mapWidth), (*i)->y*(600/mapWidth));
-		j++;
-	}
-
 	QPainter painter(this);
 
 	// Draw mark
 	//painter.setPen(palette().dark().color());
 	//painter.drawRect(QRect(0, 0, width()-1, height()-1));
 
-	painter.scale(600/mapWidth, 600/mapHeight);
+	if (mapMirrored) {
+		painter.scale(600/(mapWidth*2.0), 600/(mapHeight*2.0));
+	} else {
+		painter.scale(600/mapWidth, 600/mapHeight);
+	}
 
 	// Draw Regions
 	if (elevations) {
@@ -349,10 +406,18 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 		}
 	}
 
-	painter.resetTransform();
-	// Draw Random Points
-	painter.setPen(QPen(Qt::blue, 3));
-	painter.drawPoints(points, numRegions);
+	if (!mapMirrored) {
+		painter.resetTransform();
+		// Draw Random Points
+		QPoint points[maxRegions];
+		int j = 0;
+		for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i) {
+			points[j] = QPoint((*i)->x*(600/mapWidth), (*i)->y*(600/mapWidth));
+			j++;
+		}
+		painter.setPen(QPen(Qt::blue, 3));
+		painter.drawPoints(points, numRegions);
+	}
 
 }
 
