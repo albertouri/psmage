@@ -361,6 +361,9 @@ void RenderArea::generateTXT()
 	// Paint ******
 	// Color brushes
 	QColor *Qblack = new QColor(Qt::black);
+	QColor *Qblue = new QColor(Qt::blue);
+	QColor *Qgreen = new QColor(Qt::green);
+	QColor *Qyellow = new QColor(Qt::yellow);
 	QImage myQImage(mapWidth, mapHeight, QImage::Format_RGB32);
 	QPainter painter(&myQImage);
 	// Set background
@@ -370,9 +373,46 @@ void RenderArea::generateTXT()
  	//for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
  	//	painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
  	//}
-	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
-		for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-			painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
+	// Draw Regions
+	if (elevations) {
+		for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
+			painter.setPen(QPen(Qt::green, 0));
+			painter.setBrush(Qt::green);
+			if ((*i)->elevation == 2) {
+				painter.setBrush(Qt::yellow);
+				painter.setPen(QPen(Qt::yellow, 0));
+			}
+
+			// Sorting vertexes of polygon
+			std::vector<VEdge *> edgesVector;
+			std::vector<QPoint> polyVvector;
+			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+				edgesVector.push_back(*j);
+			}
+			polyVvector.push_back(QPoint((int)edgesVector[0]->start->x, (int)edgesVector[0]->start->y));
+			polyVvector.push_back(QPoint((int)edgesVector[0]->end->x, (int)edgesVector[0]->end->y));
+			edgesVector.erase(edgesVector.begin());
+			while (edgesVector.size() > 0) {
+				for(std::vector<VEdge *>::iterator m = edgesVector.begin(); m!= edgesVector.end(); ++m) {
+					if (polyVvector.back().x() == (int)(*m)->start->x && polyVvector.back().y() == (int)(*m)->start->y) {
+						polyVvector.push_back(QPoint((int)(*m)->end->x, (*m)->end->y));
+						edgesVector.erase(m);
+						break;
+					}
+					if (polyVvector.back().x() == (int)(*m)->end->x && polyVvector.back().y() == (int)(*m)->end->y) {
+						polyVvector.push_back(QPoint((int)(*m)->start->x, (*m)->start->y));
+						edgesVector.erase(m);
+						break;
+					}
+				}
+			}
+
+			QPoint polyPoints[99];  // TODO better use of memory
+			int k = 0;
+			for(std::vector<QPoint>::iterator m = polyVvector.begin(); m!= polyVvector.end(); ++m) {
+				polyPoints[k] = *m; ++k;
+			}
+			painter.drawPolygon(polyPoints, k);
 		}
 	}
 	painter.end();
@@ -384,8 +424,12 @@ void RenderArea::generateTXT()
 	for (int i=0; i<mapWidth; i++) {
 		for (int j=0; j<mapHeight; j++) {
 			color->setRgb(myQImage.pixel(j,i));
-			if (color->name() == Qblack->name())
+			if (color->name() == Qblue->name())
+				fileTxt << 0;
+			else if (color->name() == Qgreen->name())
 				fileTxt << 1;
+			else if (color->name() == Qyellow->name())
+				fileTxt << 2;
 			else
 				fileTxt << 0;
 		}
