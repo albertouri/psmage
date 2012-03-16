@@ -5,6 +5,8 @@
 
 
 #include <fstream>
+std::ofstream fileLog("log.txt");
+#define LOG(Message) fileLog << Message << std::endl
 
 RenderArea::RenderArea(QWidget *parent)
 :	QWidget(parent)
@@ -41,15 +43,22 @@ void RenderArea::generateVoroni()
 	// Generate Regions Graph (and clipping edges)
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
 		clipping((*i)->start, (*i)->end);
-		if ((*i)->start->x == (*i)->end->x && (*i)->start->y == (*i)->end->y) continue; // edge of length=0
-		PointToRegionMap::iterator found = pointsToRegion.find((*i)->left);
-		Region *region1 = found->second;
-		PointToRegionMap::iterator found2 = pointsToRegion.find((*i)->right);
-		Region *region2 = found2->second;
-		region1->neighbors.push_back(region2);
-		region1->borders.push_back(*i);
-		region2->neighbors.push_back(region1);
-		region2->borders.push_back(*i);
+		if ( !((int)(*i)->start->x == (int)(*i)->end->x && (int)(*i)->start->y == (int)(*i)->end->y) ) { // ignoring edge of length=0
+			// ignoring bad borders
+			if (!(((int)(*i)->start->x == 0 && (int)(*i)->end->x == 0) ||
+				((int)(*i)->start->x == mapWidth && (int)(*i)->end->x == mapWidth) ||
+				((int)(*i)->start->y == 0 && (int)(*i)->end->y == 0) ||
+				((int)(*i)->start->y == mapHeight && (int)(*i)->end->y == mapHeight)) ) {
+					PointToRegionMap::iterator found = pointsToRegion.find((*i)->left);
+					Region *region1 = found->second;
+					PointToRegionMap::iterator found2 = pointsToRegion.find((*i)->right);
+					Region *region2 = found2->second;
+					region1->neighbors.push_back(region2);
+					region1->borders.push_back(*i);
+					region2->neighbors.push_back(region1);
+					region2->borders.push_back(*i);
+			}
+		}
 	}
 
 	// Generate border map edges
@@ -113,7 +122,7 @@ void RenderArea::generateVoroni()
 						(*i)->borders.push_back(new VEdge(new VPoint(mapWidth, 0), new VPoint(mapWidth, mapHeight)));
 						(*i)->minYborderMap = TRUE;
 						if (y0edges.size() == 2) { 
-							(*i)->borders.push_back(new VEdge(new VPoint(mapWidth, 0), y0edges[0]));
+							(*i)->borders.push_front(new VEdge(new VPoint(mapWidth, 0), y0edges[0]));
 						} else { /* UNEXPECTED END, MISSING EDGES? */ }
 					}	
 				}
@@ -136,14 +145,12 @@ void RenderArea::generateVoroni()
 					}	
 				}
 			}
-		} else if (x0edges.size() > 2) {
+		} else if (x0edges.size() == 4 && (int)x0edges[0]->y != (int)x0edges[2]->y) {
 			(*i)->minXborderMap = TRUE;
 			(*i)->borders.push_back(new VEdge(x0edges[0], x0edges[2]));
 		}
 		// starting on x=max edges
 		else if (xMaxedges.size() == 2) {
-
-		//if (xMaxedges.size() == 2) {
 			bool goTopY = TRUE;
 			//double m = (double)(xMaxedges[1]->y - xMaxedges[0]->y) / (xMaxedges[1]->x - xMaxedges[0]->x);
 			//double b = (double)xMaxedges[0]->y - (m * xMaxedges[0]->x);
@@ -169,7 +176,7 @@ void RenderArea::generateVoroni()
 						(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(0, mapHeight)));
 						(*i)->minYborderMap = TRUE;
 						if (y0edges.size() == 2) { 
-							(*i)->borders.push_back(new VEdge(new VPoint(0, 0), y0edges[0]));
+							(*i)->borders.push_front(new VEdge(new VPoint(0, 0), y0edges[0]));
 						} else { /* UNEXPECTED END, MISSING EDGES? */ }
 					}
 				}
@@ -187,18 +194,18 @@ void RenderArea::generateVoroni()
 						(*i)->borders.push_back(new VEdge(new VPoint(0, mapHeight), new VPoint(0, 0)));
 						(*i)->maxYborderMap = TRUE;
 						if (yMaxedges.size() == 2) { 
-							(*i)->borders.push_back(new VEdge(new VPoint(0, mapHeight), yMaxedges[0]));
+							(*i)->borders.push_front(new VEdge(new VPoint(0, mapHeight), yMaxedges[0]));
 						} else { /* UNEXPECTED END, MISSING EDGES? */ }
 					}
 				}
 			}
-		} else if (xMaxedges.size() > 2) {
+		} else if (xMaxedges.size() == 4 && (int)xMaxedges[0]->y != (int)xMaxedges[2]->y) {
 			(*i)->maxXborderMap = TRUE;
 			(*i)->borders.push_back(new VEdge(xMaxedges[0], xMaxedges[2]));
-		} else if (y0edges.size() > 2) {
+		} else if (y0edges.size() == 4 && (int)y0edges[0]->x != (int)y0edges[2]->x) {
 			(*i)->minYborderMap = TRUE;
 			(*i)->borders.push_back(new VEdge(y0edges[0], y0edges[2]));
-		} else if (yMaxedges.size() > 2) {
+		} else if (yMaxedges.size() == 4 && (int)yMaxedges[0]->x != (int)yMaxedges[2]->x) {
 			(*i)->maxYborderMap = TRUE;
 			(*i)->borders.push_back(new VEdge(yMaxedges[0], yMaxedges[2]));
 		}
@@ -294,14 +301,37 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 				painter.setBrush(Qt::yellow);
 				painter.setPen(QPen(Qt::yellow, 0));
 			}
+			
+			// Sorting vertexes of polygon
+			std::vector<VEdge *> edgesVector;
+			std::vector<QPoint> polyVvector;
+			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+				edgesVector.push_back(*j);
+			}
+			polyVvector.push_back(QPoint((int)edgesVector[0]->start->x, (int)edgesVector[0]->start->y));
+			polyVvector.push_back(QPoint((int)edgesVector[0]->end->x, (int)edgesVector[0]->end->y));
+			edgesVector.erase(edgesVector.begin());
+			while (edgesVector.size() > 0) {
+				for(std::vector<VEdge *>::iterator m = edgesVector.begin(); m!= edgesVector.end(); ++m) {
+					if (polyVvector.back().x() == (int)(*m)->start->x && polyVvector.back().y() == (int)(*m)->start->y) {
+						polyVvector.push_back(QPoint((int)(*m)->end->x, (*m)->end->y));
+						edgesVector.erase(m);
+						break;
+					}
+					if (polyVvector.back().x() == (int)(*m)->end->x && polyVvector.back().y() == (int)(*m)->end->y) {
+						polyVvector.push_back(QPoint((int)(*m)->start->x, (*m)->start->y));
+						edgesVector.erase(m);
+						break;
+					}
+				}
+			}
+
 			QPoint polyPoints[99];  // TODO better use of memory
 			int k = 0;
-			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-				// TODO trying to sort points properly
-				polyPoints[k] = QPoint((*j)->start->x, (*j)->start->y); ++k;
-				polyPoints[k] = QPoint((*j)->end->x, (*j)->end->y); ++k;
+			for(std::vector<QPoint>::iterator m = polyVvector.begin(); m!= polyVvector.end(); ++m) {
+				polyPoints[k] = *m; ++k;
 			}
-			painter.drawPolygon(polyPoints, (*i)->borders.size()*2); //TODO use k value
+			painter.drawPolygon(polyPoints, k);
 		}
 	}
 
@@ -415,17 +445,17 @@ void RenderArea::clipping(VPoint *p1, VPoint *p2)
 			// Now find the intersection point;
 			// use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
 			if (outcodeOut & TOP) {           // point is above the clip rectangle
-				x = p1->x + (p2->x - p1->x) * (mapHeight - p1->y) / (p2->y - p1->y);
-				y = mapHeight;
+				x = p1->x + (p2->x - p1->x) * ((double)mapHeight - p1->y) / (p2->y - p1->y);
+				y = (double)mapHeight;
 			} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
-				x = p1->x + (p2->x - p1->x) * (0 - p1->y) / (p2->y - p1->y);
-				y = 0;
+				x = p1->x + (p2->x - p1->x) * ((double)0 - p1->y) / (p2->y - p1->y);
+				y = (double)0;
 			} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-				y = p1->y + (p2->y - p1->y) * (mapWidth - p1->x) / (p2->x - p1->x);
-				x = mapWidth;
+				y = p1->y + (p2->y - p1->y) * ((double)mapWidth - p1->x) / (p2->x - p1->x);
+				x = (double)mapWidth;
 			} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
-				y = p1->y + (p2->y - p1->y) * (0 - p1->x) / (p2->x - p1->x);
-				x = 0;
+				y = p1->y + (p2->y - p1->y) * ((double)0 - p1->x) / (p2->x - p1->x);
+				x = (double)0;
 			}
 			// Now we move outside point to intersection point to clip
 			// and get ready for next pass.
@@ -441,10 +471,10 @@ void RenderArea::clipping(VPoint *p1, VPoint *p2)
 		}
 	}
 	if (!accept) {
-		p1->x = 0;
-		p1->y = 0;
-		p2->x = 0;
-		p2->y = 0;
+		p1->x = 0.0;
+		p1->y = 0.0;
+		p2->x = 0.0;
+		p2->y = 0.0;
 	}
 
 }
