@@ -1,0 +1,4 @@
+* Place a file named 'map.txt' in the same directory as convert.rb
+    * Ensure the map is a valid SC dimension (64x64, 96x96, 128x128, etc)
+* Run convert.rb
+* Open output.scx in staredit/starcraft
