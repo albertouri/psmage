@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-
+@input_name = 'map.txt'
 @output_name = 'output.scx'
 @types = {
   'chars' => 'A',  # not changed
@@ -21,7 +21,7 @@ upgx = (File.open('upgx.bin', 'rb')).read
 tecx = (File.open('tecx.bin', 'rb')).read
 
 tile = []
-map = File.open('map', 'r') do |file|
+map = File.open(@input_name, 'r') do |file|
   while (line = file.gets)
     line.each_char do |c|
       if c == "1"
