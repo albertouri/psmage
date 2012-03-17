@@ -423,16 +423,22 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 void RenderArea::generateTXT()
 {
+	int finalWidth = mapWidth;
+	int finalHeight = mapHeight;
+	if (mapMirrored) {
+		finalWidth = mapWidth*2;
+		finalHeight = mapHeight*2;
+	}
 	// Paint ******
 	// Color brushes
 	QColor *Qblack = new QColor(Qt::black);
 	QColor *Qblue = new QColor(Qt::blue);
 	QColor *Qgreen = new QColor(Qt::green);
 	QColor *Qyellow = new QColor(Qt::yellow);
-	QImage myQImage(mapWidth, mapHeight, QImage::Format_RGB32);
+	QImage myQImage(finalWidth, finalHeight, QImage::Format_RGB32);
 	QPainter painter(&myQImage);
 	// Set background
-	painter.fillRect(0, 0, mapWidth, mapHeight, Qt::white);
+	painter.fillRect(0, 0, finalWidth, finalHeight, Qt::white);
 	// Draw Voronoi Edges
 	painter.setBrush(Qt::black);
  	//for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
@@ -486,8 +492,8 @@ void RenderArea::generateTXT()
 	// Print TXT ************
 	QColor *color = new QColor;
 	std::ofstream fileTxt("map.txt");
-	for (int i=0; i<mapWidth; i++) {
-		for (int j=0; j<mapHeight; j++) {
+	for (int i=0; i<finalWidth; i++) {
+		for (int j=0; j<finalHeight; j++) {
 			color->setRgb(myQImage.pixel(j,i));
 			if (color->name() == Qblue->name())
 				fileTxt << 0;
