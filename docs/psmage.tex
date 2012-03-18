@@ -31,6 +31,7 @@ Game designers can spend a lot of time tuning their maps to make it well balance
 \section{Introduction} % (fold)
 \label{sec:introduction}
 Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for offline content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the possibility of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+
 In this paper, we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games, where balance is key. Our algorithm automatically generates balanced maps for a specific strategy game: StarCraft.
 % section introduction (end)
 
@@ -38,6 +39,7 @@ In this paper, we present an approach to generating maps to real-time strategy g
 \section{Problem definition} % (fold)
 \label{sec:problem_definition}
 As mentioned above, creating balanced maps designed for competitive play can be time consuming for a designer, and difficult to do with conventional tools. A procedurally generated map that can ensure a balanced match up can save a designer time of creating maps, as well as guaranteeing a fair playing field for the players. For larger game studios, this can mean lower costs on newer content and for smaller studios, this could save time where resources are limited.
+
 As the ease of procedurally generated map creation increases, so does the potential of non-professionals creating competitive maps. If the usability of a map creator is sufficient, the barrier of entry for designing maps is significantly lowered for gamers, not developers, to make their own content for practice, casual play with friends or competitions.
 
 % section problem_definition (end)
@@ -138,7 +140,7 @@ Some of the sections' binary data was copied into our converter for use that wer
 
 Once a map file is set up with default settings, we bring in the text file output created by the Voronoi diagram previously and parse the map's dimensions (DIM), set a tileset (ERA=07, Twilight World) and set a tile value depending on the height of input. TILE is a matrix of 2 byte int tile values of $2 \times ((mapWidth)  \times (mapHeight))$ bytes, where each int represents what image should be painted on the ground at that coordinate. We use $37$ for low ground in our tileset and $67$ for high ground.
 
-While StarCraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds as in Figure /cite{iso-diamonds}, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
+While StarCraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds as in Figure \ref{fig:iso-diamonds} (credits from \cite{Zepir}), effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
 
 \begin{figure}[ht]
     \centering
