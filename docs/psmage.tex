@@ -137,7 +137,14 @@ Some of the sections' binary data was copied into our converter for use that wer
 
 Once a map file is set up with default settings, we bring in the text file output created by the Voronoi diagram previously and parse the map's dimensions (DIM), set a tileset (ERA=07, Twilight World) and set a tile value depending on the height of input. TILE is a matrix of 2 byte int tile values of $2 \times ((mapWidth)  \times (mapHeight))$ bytes, where each int represents what image should be painted on the ground at that coordinate. We use $37$ for low ground in our tileset and $67$ for high ground.
 
-While Starcraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
+While Starcraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds as in Figure /cite{iso-diamonds}, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=8cm]{iso-diamonds.png}
+    \caption{Isometric diamonds pattern}
+    \label{fig:iso-diamonds}
+\end{figure}
 
 In the creation of a Starcraft to Warcraft 3 map conversion tool, Z\'{e}pir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zepir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
 
