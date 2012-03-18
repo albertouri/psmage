@@ -3,6 +3,8 @@
 \usepackage{times}
 \usepackage{helvet}
 \usepackage{courier}
+\usepackage{subfig}
+\usepackage{graphicx}
 \frenchspacing
 \pdfinfo{
 /Title (PSMAGE: Procedural Starcraft MAp GEneration)
@@ -21,15 +23,19 @@ Philadelphia\\
 \maketitle
 \begin{abstract}
 \begin{quote}
-Human map designer lost a lot of time tunning their maps to make it well balanced. This paper presents an algorithm for generating balanced maps for the popular real-time strategy (RTS) game StarCraft. We use Voronoi diagrams to randomly generate polygons as starting point. Then different properties are assigned to the polygons with some fitness functions in order to make consistent and balanced maps.
+Human map designers lost a lot of time tunning their maps to make it well balanced. This paper presents an algorithm for generating balanced maps for the popular real-time strategy (RTS) game StarCraft. We use Voronoi diagrams to randomly generate polygons as starting point. Then different properties are assigned to the polygons with some fitness functions in order to make consistent and balanced maps.
 \end{quote}
 \end{abstract}
 
 
 \section{Introduction} % (fold)
 \label{sec:introduction}
-
-
+Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes
+in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters,
+weapons, planets, plants, histories) and many ways in which it can be generated (many based on AI/CI methods such as
+constraint satisfaction, planning or evolutionary computation, others on e.g. fractals). PCG can also be used in different
+ways in games, for example for ofﬂine content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the making possible of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+This paper we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games. Our algorithm automatically generate balanced maps for a specific strategy game: Starcraft.
 % section introduction (end)
 
 
@@ -61,7 +67,14 @@ The algorithm presented in this paper can be outlined as the following sequence 
 Each step shall now be described in detail. For illustrative purposes, the result of each step will be shown.
 
 \subsection{1. Generate a random seed point}
-First of all we must set the size of the map and the number of regions desired. Then we generate a random seed point for each region inside the map. The output of this step is shown in Figure "XXXX".
+First of all we must set the size of the map and the number of regions desired. Then we generate a random seed point for each region inside the map. The output of this step is shown in Figure \ref{fig:random-points}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{PCG01.png}
+    \caption{Random points}
+    \label{fig:random-points}
+\end{figure}
 
 \subsection{2. Compute Voronoi diagram}
 The second step is to compute the Voronoi diagram from a set of points. This is accomplished using the fast Fortune's Algorithm \cite{Fortune}. This approach use the idea of sweep line algorithms to design an efficient algorithm where its total time to process is O(\emph{n} log \emph{n}).
@@ -78,15 +91,36 @@ The second graph has nodes for each edge of the region. But the problem of Fortu
 	\item Detect regions with edges ending on different borders.
 	\item Given a edge ending in a border, detect if the edge is in \emph{left/up} or \emph{right/bottom} side of the seed point. And expand the border in the right direction until find the second edge ending in a border.
 \end{enumerate}
-Now we are able to draw the polygon of each region as we shown in Figure "XXXX".
+Now we are able to draw the polygon of each region as we shown in Figure \ref{fig:voronoi-diagram}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{PCG02.png}
+    \caption{Voronoi diagram}
+    \label{fig:voronoi-diagram}
+\end{figure}
 
 \subsection{4. Compute region elevation}
 In this step we decide the elevation of each region. Set the \% of hills regions (50 in our examples) and select randomly this regions. In this step we must ensure a path between the most left-up region to the most right-bottom region. This is because the most left-up region contains a starting point (location where a player start the game) and after the mirroring step each 1/4 parts of the map are connected through the initial most right-bottom region.
 
-The fitness function to ensure this, it is an implementation of A* where the initial node is the most left-up region and the goal node is the most right-bottom region. We can use the neighbors graph described on step 3. If no path is found then we generate again the elevation info. Elevation information is shown in Figure "XXXX".
+The fitness function to ensure this, it is an implementation of A* where the initial node is the most left-up region and the goal node is the most right-bottom region. We can use the neighbors graph described on step 3. If no path is found then we generate again the elevation info. Elevation information is shown in Figure \ref{fig:elevations}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{PCG03.png}
+    \caption{Elevations}
+    \label{fig:elevations}
+\end{figure}
 
 \subsection{5. Mirror map}
-In order to get a balanced map like those used in Starcraft competitions. We perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as we shown in Figure "XXXX".
+In order to get a balanced map like those used in Starcraft competitions. We perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as we shown in Figure \ref{fig:mirrored-map}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{PCG04.png}
+    \caption{Mirrored map}
+    \label{fig:mirrored-map}
+\end{figure}
 
 \subsection{6. Parse output into a .chk file}
 
