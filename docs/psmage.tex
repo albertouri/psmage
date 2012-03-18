@@ -13,7 +13,7 @@
 % The file aaai.sty is the style file for AAAI Press 
 % proceedings, working notes, and technical reports.
 %
-\title{PSMAGE: Procedural Starcraft MAp Generation}
+\title{PSMAGE: Procedural Starcraft MAp GEneration}
 \author{Alberto Uriarte \and Jordan Santell\\
 Drexel University\\
 Philadelphia\\
@@ -25,15 +25,29 @@ Human map designer lost a lot of time tunning their maps to make it well balance
 \end{quote}
 \end{abstract}
 
-\section{Introduction}
-This sections are tentavie
 
-\section{Problem definition}
+\section{Introduction} % (fold)
+\label{sec:introduction}
 
-\section{Related work}
-Santi says that we don't have to do this kind of section...
 
-\section{Procedural map generation}
+% section introduction (end)
+
+
+\section{Problem definition} % (fold)
+\label{sec:problem_definition}
+
+
+% section problem_definition (end)
+
+
+\section{Related work} % (fold)
+\label{sec:related_work}
+Santi said that we don't have to do this section...
+% section related_work (end)
+
+
+\section{Procedural map generation} % (fold)
+\label{sec:procedural_map_generation}
 The algorithm presented in this paper can be outlined as the following sequence of seven steps:
 \begin{enumerate}
 	\item Generate a random seed point
@@ -44,21 +58,35 @@ The algorithm presented in this paper can be outlined as the following sequence 
 	\item Parse output into a .chk file
 	\item MPQ archive
 \end{enumerate}
+Each step shall now be described in detail. For illustrative purposes, the result of each step will be shown.
 
 \subsection{1. Generate a random seed point}
-
+First of all we must set the size of the map and the number of regions desired. Then we generate a random seed point for each region inside the map. The output of this step is shown in Figure "XXXX".
 
 \subsection{2. Compute Voronoi diagram}
-
+The second step is to compute the Voronoi diagram from a set of points. This is accomplished using the fast Fortune's Algorithm \cite{Fortune}. This approach use the idea of sweep line algorithms to design an efficient algorithm where its total time to process is O(\emph{n} log \emph{n}).
 
 \subsection{3. Add borders}
+The third step consist in generate the graph structure of regions. We represent region information as two related graphs: neighbors and edges.
 
+The first graph has nodes for each adjacent region, which is useful for pathfinding algorithms. Notice that this graph is also knows as Delaunay triangulation.
+
+The second graph has nodes for each edge of the region. But the problem of Fortune's Algorithm is that it doesn't compute border map edges. To solve this we followed this steps:
+\begin{enumerate}
+	\item Detect regions with two edges ending on the same border.
+	\item Create a new edge to link those edges.
+	\item Detect regions with edges ending on different borders.
+	\item Given a edge ending in a border, detect if the edge is in \emph{left/up} or \emph{right/bottom} side of the seed point. And expand the border in the right direction until find the second edge ending in a border.
+\end{enumerate}
+Now we are able to draw the polygon of each region as we shown in Figure "XXXX".
 
 \subsection{4. Compute region elevation}
+In this step we decide the elevation of each region. Set the \% of hills regions (50 in our examples) and select randomly this regions. In this step we must ensure a path between the most left-up region to the most right-bottom region. This is because the most left-up region contains a starting point (location where a player start the game) and after the mirroring step each 1/4 parts of the map are connected through the initial most right-bottom region.
 
+The fitness function to ensure this, it is an implementation of A* where the initial node is the most left-up region and the goal node is the most right-bottom region. We can use the neighbors graph described on step 3. If no path is found then we generate again the elevation info. Elevation information is shown in Figure "XXXX".
 
 \subsection{5. Mirror map}
-
+In order to get a balanced map like those used in Starcraft competitions. We perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as we shown in Figure "XXXX".
 
 \subsection{6. Parse output into a .chk file}
 
@@ -66,20 +94,29 @@ The algorithm presented in this paper can be outlined as the following sequence 
 \subsection{7. MPQ archive}
 
 
+% section procedural_map_generation (end)
+
+
 \section{Implementation} % (fold)
 \label{sec:implementation}
-
+This algorithm has been implemented in C++ for the map generation and Ruby for the conversion into a Starcraft map format. Additionally, PSMAGE uses the Qt framework to draw the results of each step.
 % section implementation (end)
+
 
 \section{Results} % (fold)
 \label{sec:results}
 
 % section results (end)
 
+
 \section{Future research} % (fold)
 \label{sec:future_research}
-
+These are some ideas:
+Use poison distribution to generate random points.
+Use Lloyd's relaxation to smooth regions
+Experiment with other mirroring techniques
 % section future_research (end)
+
 
 \section{Conclusion} % (fold)
 \label{sec:conclusion}
@@ -89,6 +126,6 @@ The algorithm presented in this paper can be outlined as the following sequence 
 
 %%%%%%%%%%
 % References and End of Paper
-% \bibliography{psmage-bib}
-% \bibliographystyle{aaai}
+\bibliography{psmage}
+\bibliographystyle{aaai}
 \end{document}
