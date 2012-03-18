@@ -7,7 +7,7 @@
 \usepackage{graphicx}
 \frenchspacing
 \pdfinfo{
-/Title (PSMAGE: Procedural Starcraft MAp GEneration)
+/Title (PSMAGE: Procedural StarCraft MAp GEneration)
 /Subject (AAAI Publications)
 /Author (Alberto Uriarte, Jordan Santell)}
 \setcounter{secnumdepth}{0}  
@@ -15,7 +15,7 @@
 % The file aaai.sty is the style file for AAAI Press 
 % proceedings, working notes, and technical reports.
 %
-\title{PSMAGE: Procedural Starcraft MAp GEneration}
+\title{PSMAGE: Procedural StarCraft MAp GEneration}
 \author{Alberto Uriarte \and Jordan Santell\\
 Drexel University\\
 Philadelphia\\
@@ -30,21 +30,22 @@ Game designers can spend a lot of time tuning their maps to make it well balance
 
 \section{Introduction} % (fold)
 \label{sec:introduction}
-Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for ofﬂine content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the possibility of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
-In this paper, we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games, where balance is key. Our algorithm automatically generate balanced maps for a specific strategy game: Starcraft.
+Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for offline content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the possibility of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+In this paper, we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games, where balance is key. Our algorithm automatically generates balanced maps for a specific strategy game: StarCraft.
 % section introduction (end)
 
 
 \section{Problem definition} % (fold)
 \label{sec:problem_definition}
-
+As mentioned above, creating balanced maps designed for competitive play can be time consuming for a designer, and difficult to do with conventional tools. A procedurally generated map that can ensure a balanced match up can save a designer time of creating maps, as well as guaranteeing a fair playing field for the players. For larger game studios, this can mean lower costs on newer content and for smaller studios, this could save time where resources are limited.
+As the ease of procedurally generated map creation increases, so does the potential of non-professionals creating competitive maps. If the usability of a map creator is sufficient, the barrier of entry for designing maps is significantly lowered for gamers, not developers, to make their own content for practice, casual play with friends or competitions.
 
 % section problem_definition (end)
 
 
 \section{Related work} % (fold)
 \label{sec:related_work}
-This is not the first time where Starcraft maps are used as a testbed to do research. Luke Perkins developed the library BWTA to do terrain analysis on Starcraft maps \cite{Perkins10}. Z\'{e}pir researched on a Starcraft 2D map conversion into a Warcraft III 3D map \cite{Zepir}. And Togelius et al. also presented a methodology based on search for generating Starcraft maps \cite{Togelius10}.
+This is not the first time where StarCraft maps are used as a testbed to do research. Luke Perkins developed the library BWTA to do terrain analysis on StarCraft maps \cite{Perkins10}. Z\'{e}pir researched on a StarCraft 2D map conversion into a Warcraft III 3D map \cite{Zepir}. And Togelius et al. also presented a methodology based on search for generating StarCraft maps \cite{Togelius10}.
 % section related_work (end)
 
 
@@ -109,7 +110,7 @@ The fitness function to ensure this, it is an implementation of A* where the ini
 \end{figure}
 
 \subsection{5. Mirror map}
-In order to get a balanced map like those used in Starcraft competitions, we perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result, we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as shown in Figure \ref{fig:mirrored-map}.
+In order to get a balanced map like those used in StarCraft competitions, we perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result, we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as shown in Figure \ref{fig:mirrored-map}.
 
 \begin{figure}[ht]
     \centering
@@ -121,7 +122,7 @@ In order to get a balanced map like those used in Starcraft competitions, we per
 \subsection{6. Parse output into a .chk file}
 After mirroring our map, we generate a simple text output consisting of numbers assembled in a matrix format, where each number represents one tile, such that the output will have $(mapWidth) \times (mapHeight)$ numbers/tiles. The current values for output are 0 (water), 1 (low ground), and 2 (high ground).
 
-Blizzard Entertainment uses their own archiving format for many of their games' files, the MPQ format. Starcraft is no exception, with map files (.scm, .scx) storing the map data in a CHK format, along with any other media used in that map, inside a MPQ archive. Using WinMPQ, we can extract the CHK file from the archive, which is a binary file containing up to 39 key-value pairs, where each section specifies information about the map, such as version information, terrain, custom options for units, upgrades and buildings and more. Each key contains 4 bytes of the section type, followed by a single 4 byte long (little-endian) indicating the length in bytes of the corresponding value immediately following the long \cite{Olbrantz}.
+Blizzard Entertainment uses their own archiving format for many of their games' files, the MPQ format. StarCraft is no exception, with map files (.scm, .scx) storing the map data in a CHK format, along with any other media used in that map, inside a MPQ archive. Using WinMPQ, we can extract the CHK file from the archive, which is a binary file containing up to 39 key-value pairs, where each section specifies information about the map, such as version information, terrain, custom options for units, upgrades and buildings and more. Each key contains 4 bytes of the section type, followed by a single 4 byte long (little-endian) indicating the length in bytes of the corresponding value immediately following the long \cite{Olbrantz}.
 
 Example of CHK key-value in hexadecimal
 \begin{verbatim}
@@ -133,11 +134,11 @@ The first four bytes (43 4F 4C 52) represent the name of the section "COLR", fol
 
 Each section has its own meaning on how to interpret their value, and can contain any combination of bytes, ints (2 bytes), longs (4 bytes) or chars (2 bytes). For example, the UNIx section contains unit settings for the level, which contains 4168 bytes of information for the 228 units in Brood War in a structured format of bytes and ints indicating the units' hit points, shield points, armor points, mineral and gas cost, current upgrade settings, and more.
 
-Some of the sections' binary data was copied into our converter for use that were not related to terrain, such as the unit information/upgrades (PUPx, PTEx, UNIx, UPGx, TECx) and verification code (VCOD). Many more sections were filled with default data that are common in all non-custom maps, like version information and player information (TYPE, VER, IVE2, IOWN, OWNR, SIDE, PUNI, MASK, FORC) as well as the sections that are often used in heavily scripted Starcraft maps (STR, UPRP, UPUS, MRGN, TRIG, MBRF, SPRP, WAV, SWNM). We also set the sections related to doodads (objects that prevent movement on the map, like a statue) to their default values (DD2, THG2, MTXM).
+Some of the sections' binary data was copied into our converter for use that were not related to terrain, such as the unit information/upgrades (PUPx, PTEx, UNIx, UPGx, TECx) and verification code (VCOD). Many more sections were filled with default data that are common in all non-custom maps, like version information and player information (TYPE, VER, IVE2, IOWN, OWNR, SIDE, PUNI, MASK, FORC) as well as the sections that are often used in heavily scripted StarCraft maps (STR, UPRP, UPUS, MRGN, TRIG, MBRF, SPRP, WAV, SWNM). We also set the sections related to doodads (objects that prevent movement on the map, like a statue) to their default values (DD2, THG2, MTXM).
 
 Once a map file is set up with default settings, we bring in the text file output created by the Voronoi diagram previously and parse the map's dimensions (DIM), set a tileset (ERA=07, Twilight World) and set a tile value depending on the height of input. TILE is a matrix of 2 byte int tile values of $2 \times ((mapWidth)  \times (mapHeight))$ bytes, where each int represents what image should be painted on the ground at that coordinate. We use $37$ for low ground in our tileset and $67$ for high ground.
 
-While Starcraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds as in Figure /cite{iso-diamonds}, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
+While StarCraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds as in Figure /cite{iso-diamonds}, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
 
 \begin{figure}[ht]
     \centering
@@ -146,7 +147,7 @@ While Starcraft is based off of a grid, in the map editor, Staredit, users can c
     \label{fig:iso-diamonds}
 \end{figure}
 
-In the creation of a Starcraft to Warcraft 3 map conversion tool, Z\'{e}pir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zepir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
+In the creation of a StarCraft to Warcraft 3 map conversion tool, Z\'{e}pir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zepir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
 
 \begin{figure*}[ht]
   \centering
@@ -155,7 +156,7 @@ In the creation of a Starcraft to Warcraft 3 map conversion tool, Z\'{e}pir has 
   \subfloat[Tileset Space Platform]{\includegraphics[width=0.33\textwidth]{spaceplatform.PNG}}
   ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. (or a blank line to force the subfig onto a new line)
   \subfloat[Tileset Twilight World]{\includegraphics[width=0.33\textwidth]{twilight.PNG}}
-  \caption{Starcraft generated map with different tilesets}
+  \caption{StarCraft generated map with different tilesets}
   \label{fig:final-maps}
 \end{figure*}
 
@@ -168,7 +169,7 @@ MPQ (MoPaQ) is an archive format developed by Blizzard Entertainment, purposed f
 	\item Diablo II
 	\item Warcraft III
 	\item World of Warcraft
-	\item Starcraft II
+	\item StarCraft II
 	\item Lord of Magic (by Sierra)
 	\item Hellfire (Diablo datadisk by Sierra)
 \end{itemize}
@@ -182,14 +183,14 @@ They designed this archive format with the following reguirements:
 	\item[Multilanguage] Blizzard planned to release its games worldwide, in various language versions. The archive format must support storing multiple files with different languages.
 \end{description}
 
-Upon the export of the CHK file, we can put it back into an MPQ archive, or we can just rename the file extension to .scx and open the file in Staredit/Starcraft.
+Upon the export of the CHK file, we can put it back into an MPQ archive, or we can just rename the file extension to .scx and open the file in StarEdit/StarCraft.
 
 % section procedural_map_generation (end)
 
 
 \section{Implementation} % (fold)
 \label{sec:implementation}
-This algorithm has been implemented in C++ for the map generation and Ruby for the conversion into a Starcraft map format. Additionally, PSMAGE uses the Qt framework to draw the results of each step. Additionally, WinMPQ was used to pull out CHK files from the MPQ archives, and AXE 3 to view and debug the binary CHK files.
+This algorithm has been implemented in C++ for the map generation and Ruby for the conversion into a StarCraft map format. Additionally, PSMAGE uses the Qt framework to draw the results of each step. Additionally, WinMPQ was used to pull out CHK files from the MPQ archives, and AXE 3 to view and debug the binary CHK files.
 % section implementation (end)
 
 
@@ -211,7 +212,7 @@ Our PCG algorithm classify as follows:
 
 \section{Conclusion} % (fold)
 \label{sec:conclusion}
-In this paper, we used an iterative algorithm with a map graph structure. We defined some constraints and some ﬁtness functions measuring map qualities. We have also develop a basic matrix map converter to Starcraft map format. We believe that our maps are comparable with those made by humans for a tournament game propose, and can be used for completely automated map generation and to assist human map designers.
+In this paper, we used an iterative algorithm with a map graph structure. We defined some constraints and some ﬁtness functions measuring map qualities. We have also develop a basic matrix map converter to StarCraft map format. We believe that our maps are comparable with those made by humans for a tournament game propose, and can be used for completely automated map generation and to assist human map designers.
 
 Future work will deal with some points that we didn't have time to test:
 \begin{itemize}
