@@ -89,17 +89,37 @@ The fitness function to ensure this, it is an implementation of A* where the ini
 In order to get a balanced map like those used in Starcraft competitions. We perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as we shown in Figure "XXXX".
 
 \subsection{6. Parse output into a .chk file}
+After mirroring our map, we generate a simple text output consisting of numbers assembled in a matrix format, where each number represents one tile, such that the output will have $(mapWidth)  \times (mapHeight)$ numbers/tiles. The current values for output are 0 (water), 1 (low ground), and 2 (high ground).
+
+Blizzard Entertainment uses their own archiving format for many of their games' files, the MPQ format. Starcraft is no exception, with map files (.scm, .scx) storing the map data in a CHK format, along with any other media used in that map, inside a MPQ archive. Using WinMPQ, we can extract the CHK file from the archive, which is a binary file containing up to 39 key-value pairs, where each section specifies information about the map, such as version information, terrain, custom options for units, upgrades and buildings and more. Each key contains 4 bytes of the section type, followed by a single 4 byte long (little-endian) indicating the length in bytes of the corresponding value immediately following the long \cite{Olbrantz}.
+
+Example of CHK key-value in hexadecimal
+43 4F 4C 52 08 00 00 00
+00 01 02 03 04 05 06 07
+
+The first four bytes (43 4F 4C 52) represent the name of the section "COLR", followed by a 4 byte long (08 00 00 00), indicating the value for the section "COLR" will be 8 bytes long. For this section, each of the 8 bytes represents one of the eight players on the map, and their value can range from 0 to 15, indicating their color. In this example, player 1 is color 0 (red), player 2 is color 1 (blue), and so forth.
+
+Each section has its own meaning on how to interpret their value, and can contain any combination of bytes, ints (2 bytes), longs (4 bytes) or chars (2 bytes). For example, the UNIx section contains unit settings for the level, which contains 4168 bytes of information for the 228 units in Brood War in a structured format of bytes and ints indicating the units' hit points, shield points, armor points, mineral and gas cost, current upgrade settings, and more.
+
+Some of the sections' binary data was copied into our converter for use that were not related to terrain, such as the unit information/upgrades (PUPx, PTEx, UNIx, UPGx, TECx) and verification code (VCOD). Many more sections were filled with default data that are common in all non-custom maps, like version information and player information (TYPE, VER, IVE2, IOWN, OWNR, SIDE, PUNI, MASK, FORC) as well as the sections that are often used in heavily scripted Starcraft maps (STR, UPRP, UPUS, MRGN, TRIG, MBRF, SPRP, WAV, SWNM). We also set the sections related to doodads (objects that prevent movement on the map, like a statue) to their default values (DD2, THG2, MTXM).
+
+Once a map file is set up with default settings, we bring in the text file output created by the Voronoi diagram previously and parse the map's dimensions (DIM), set a tileset (ERA=07, Twilight World) and set a tile value depending on the height of input. TILE is a matrix of 2 byte int tile values of $2 \times ((mapWidth)  \times (mapHeight))$ bytes, where each int represents what image should be painted on the ground at that coordinate. We use $37$ for low ground in our tileset and $67$ for high ground.
+
+While Starcraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
+
+In the creation of a Starcraft to Warcraft 3 map conversion tool, Zépir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zépir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
 
 
 \subsection{7. MPQ archive}
-
+Upon the export of the CHK file, we can put it back into an MPQ archive, or we can just rename the file extension to .scx and open the file in Staredit/Starcraft.
 
 % section procedural_map_generation (end)
 
 
 \section{Implementation} % (fold)
 \label{sec:implementation}
-This algorithm has been implemented in C++ for the map generation and Ruby for the conversion into a Starcraft map format. Additionally, PSMAGE uses the Qt framework to draw the results of each step.
+This algorithm has been implemented in C++ for the map generation and Ruby for the conversion into a Starcraft map format. Additionally, PSMAGE uses the Qt framework to draw the results of each step. Additionally, WinMPQ was used to pull out CHK files from the MPQ archives, and AXE 3 to view and debug the binary CHK files.
+
 % section implementation (end)
 
 
@@ -113,8 +133,9 @@ This algorithm has been implemented in C++ for the map generation and Ruby for t
 \label{sec:future_research}
 These are some ideas:
 Use poison distribution to generate random points.
-Use Lloyd's relaxation to smooth regions
-Experiment with other mirroring techniques
+Use Lloyd's relaxation to smooth regions.
+Experiment with other mirroring techniques.
+Implement correct isometric mapping to create borders and maps that visually look like they were created in Staredit that are playable.
 % section future_research (end)
 
 
