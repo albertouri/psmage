@@ -30,11 +30,7 @@ Human map designers lost a lot of time tunning their maps to make it well balanc
 
 \section{Introduction} % (fold)
 \label{sec:introduction}
-Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes
-in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters,
-weapons, planets, plants, histories) and many ways in which it can be generated (many based on AI/CI methods such as
-constraint satisfaction, planning or evolutionary computation, others on e.g. fractals). PCG can also be used in different
-ways in games, for example for ofﬂine content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the making possible of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for ofﬂine content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the making possible of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
 This paper we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games. Our algorithm automatically generate balanced maps for a specific strategy game: Starcraft.
 % section introduction (end)
 
@@ -145,8 +141,40 @@ While Starcraft is based off of a grid, in the map editor, Staredit, users can c
 
 In the creation of a Starcraft to Warcraft 3 map conversion tool, Z\'{e}pir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zepir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
 
+\begin{figure*}[ht]
+  \centering
+  \subfloat[Tileset Desert Wrold]{\includegraphics[width=0.33\textwidth]{desertworld.png}}
+  ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. (or a blank line to force the subfig onto a new line)
+  \subfloat[Tileset Space Platform]{\includegraphics[width=0.33\textwidth]{spaceplatform.PNG}}
+  ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc. (or a blank line to force the subfig onto a new line)
+  \subfloat[Tileset Twilight World]{\includegraphics[width=0.33\textwidth]{twilight.PNG}}
+  \caption{Starcraft generated map with different tilesets}
+  \label{fig:final-maps}
+\end{figure*}
 
 \subsection{7. MPQ archive}
+MPQ (MoPaQ) is an archive format developed by Blizzard Entertainment, purposed for storing data files, images, sounds, music and videos for their games. The name MoPaQ comes from the author of the format, Mike O'Brien (Mike O'brien PaCK). So far, MPQ archives have been used for the following games:
+\begin{itemize}
+	\item Diablo
+	\item StarCraft
+	\item Warcraft II (Battle.net Edition)
+	\item Diablo II
+	\item Warcraft III
+	\item World of Warcraft
+	\item Starcraft II
+	\item Lord of Magic (by Sierra)
+	\item Hellfire (Diablo datadisk by Sierra)
+\end{itemize}
+
+They designed this archive format with the following reguirements:
+\begin{description}
+	\item[Security] Blizzard didn't want people to access their files and thus hack their games. Archive format must have supported data encryption.
+	\item[Fast access] It was necessary to access archived data as fast as possible, in realtime.
+	\item[Compression] Blizzard decided to store sound files, including music, in the WAV format. Uncompressed size of these files is very large and archive must support a compression. Several compression methods are used to store data files within MPQ archives (PKWARE Data Compression Library, ZLIB, BZIP2, LZMA and SPARSE compression), together with Huffman and IMA ADPCM compression methods used for storing WAV files.
+	\item[Expandability] Archive format must support later changes of the way how the files are stored in the archive. With new games released, the MPQ format is being extended. All the later changes are backward-compatible with older versions.
+	\item[Multilanguage] Blizzard planned to release its games worldwide, in various language versions. The archive format must support storing multiple files with different languages.
+\end{description}
+
 Upon the export of the CHK file, we can put it back into an MPQ archive, or we can just rename the file extension to .scx and open the file in Staredit/Starcraft.
 
 % section procedural_map_generation (end)
@@ -160,22 +188,24 @@ This algorithm has been implemented in C++ for the map generation and Ruby for t
 
 \section{Results} % (fold)
 \label{sec:results}
+Figure \ref{fig:final-maps} depicts maps resulting from our algorithm.
 
 % section results (end)
 
 
-\section{Future research} % (fold)
-\label{sec:future_research}
-These are some ideas:
-Use poison distribution to generate random points.
-Use Lloyd's relaxation to smooth regions.
-Experiment with other mirroring techniques.
-Implement correct isometric mapping to create borders and maps that visually look like they were created in Staredit that are playable.
-% section future_research (end)
-
-
 \section{Conclusion} % (fold)
 \label{sec:conclusion}
+In this paper, we used an iterative algorithm with a map graph structure. We defined some constraints and some ﬁtness functions measuring map qualities. We have also develop a basic matrix map converter to Starcraft map format. We believe that our maps are comparable with those made by humans for a tournament game propose, and can be used for completely automated map generation and to assist human map designers.
+
+Future work will deal with some points that we didn't have time to test:
+\begin{itemize}
+	\item A better random seed points distribution (maybe a poison distribution). Since the default random numbers are more "clumpy" than what people expect.
+	\item Use Lloyd's relaxation to smooth regions.
+	\item Experiment with other mirroring techniques.
+	\item Fitness function to add ramps on edges.
+	\item Add another step to adding some tile noise and static objects.
+	\item Implement correct isometric mapping to create borders and maps that visually look like they were created in Staredit that are playable.
+\end{itemize}
 
 % section conclusion (end)
 
