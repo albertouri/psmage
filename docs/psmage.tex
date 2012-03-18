@@ -69,7 +69,7 @@ Each step shall now be described in detail. For illustrative purposes, the resul
 \subsection{1. Generate a random seed point}
 First of all we must set the size of the map and the number of regions desired. Then we generate a random seed point for each region inside the map. The output of this step is shown in Figure \ref{fig:random-points}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=8cm]{PCG01.png}
     \caption{Random points}
@@ -93,7 +93,7 @@ The second graph has nodes for each edge of the region. But the problem of Fortu
 \end{enumerate}
 Now we are able to draw the polygon of each region as we shown in Figure \ref{fig:voronoi-diagram}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=8cm]{PCG02.png}
     \caption{Voronoi diagram}
@@ -105,7 +105,7 @@ In this step we decide the elevation of each region. Set the \% of hills regions
 
 The fitness function to ensure this, it is an implementation of A* where the initial node is the most left-up region and the goal node is the most right-bottom region. We can use the neighbors graph described on step 3. If no path is found then we generate again the elevation info. Elevation information is shown in Figure \ref{fig:elevations}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=8cm]{PCG03.png}
     \caption{Elevations}
@@ -115,7 +115,7 @@ The fitness function to ensure this, it is an implementation of A* where the ini
 \subsection{5. Mirror map}
 In order to get a balanced map like those used in Starcraft competitions. We perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as we shown in Figure \ref{fig:mirrored-map}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=8cm]{PCG04.png}
     \caption{Mirrored map}
@@ -123,13 +123,15 @@ In order to get a balanced map like those used in Starcraft competitions. We per
 \end{figure}
 
 \subsection{6. Parse output into a .chk file}
-After mirroring our map, we generate a simple text output consisting of numbers assembled in a matrix format, where each number represents one tile, such that the output will have $(mapWidth)  \times (mapHeight)$ numbers/tiles. The current values for output are 0 (water), 1 (low ground), and 2 (high ground).
+After mirroring our map, we generate a simple text output consisting of numbers assembled in a matrix format, where each number represents one tile, such that the output will have $(mapWidth) \times (mapHeight)$ numbers/tiles. The current values for output are 0 (water), 1 (low ground), and 2 (high ground).
 
 Blizzard Entertainment uses their own archiving format for many of their games' files, the MPQ format. Starcraft is no exception, with map files (.scm, .scx) storing the map data in a CHK format, along with any other media used in that map, inside a MPQ archive. Using WinMPQ, we can extract the CHK file from the archive, which is a binary file containing up to 39 key-value pairs, where each section specifies information about the map, such as version information, terrain, custom options for units, upgrades and buildings and more. Each key contains 4 bytes of the section type, followed by a single 4 byte long (little-endian) indicating the length in bytes of the corresponding value immediately following the long \cite{Olbrantz}.
 
 Example of CHK key-value in hexadecimal
+\begin{verbatim}
 43 4F 4C 52 08 00 00 00
 00 01 02 03 04 05 06 07
+\end{verbatim}
 
 The first four bytes (43 4F 4C 52) represent the name of the section "COLR", followed by a 4 byte long (08 00 00 00), indicating the value for the section "COLR" will be 8 bytes long. For this section, each of the 8 bytes represents one of the eight players on the map, and their value can range from 0 to 15, indicating their color. In this example, player 1 is color 0 (red), player 2 is color 1 (blue), and so forth.
 
@@ -141,7 +143,7 @@ Once a map file is set up with default settings, we bring in the text file outpu
 
 While Starcraft is based off of a grid, in the map editor, Staredit, users can change the terrain in isometric diamonds, effectively affecting several tiles at once, easily creating "border" tiles, like cliffs where high and low terrain meet, randomizing the tile palette, and create a smooth, seamless environment.
 
-In the creation of a Starcraft to Warcraft 3 map conversion tool, Zépir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zépir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
+In the creation of a Starcraft to Warcraft 3 map conversion tool, Z\'{e}pir has done extensive documentation on the CHK's ISOM section, indicating each isometric diamond is described by 8 bytes, with 2 bytes describing each corner of a diamond \cite{Zepir}. While not yet implemented in our converter due to creating isometric data for every possible border combination, it is desirable.
 
 
 \subsection{7. MPQ archive}
@@ -153,7 +155,6 @@ Upon the export of the CHK file, we can put it back into an MPQ archive, or we c
 \section{Implementation} % (fold)
 \label{sec:implementation}
 This algorithm has been implemented in C++ for the map generation and Ruby for the conversion into a Starcraft map format. Additionally, PSMAGE uses the Qt framework to draw the results of each step. Additionally, WinMPQ was used to pull out CHK files from the MPQ archives, and AXE 3 to view and debug the binary CHK files.
-
 % section implementation (end)
 
 
