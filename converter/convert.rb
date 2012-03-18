@@ -69,7 +69,7 @@ sections = [
   # Designates controller for player, 06 = human (redundant with IOWN?)
   { 'name'=> 'OWNR', 'length'=> 12,   'val'=>[6,6,0,0,0,0,0,0,0,0,0,0], 'type'=>'bytes' },
   # Tileset ( 7 = twilight world)
-  { 'name'=> 'ERA',  'length'=> 7,    'val'=>1,              'type'=>'int'   },
+  { 'name'=> 'ERA',  'length'=> 2,    'val'=>7,              'type'=>'int'   },
   # Dimensions
   { 'name'=> 'DIM',  'length'=> 4,    'val'=>[width, height], 'type'=>'int'  },
   # Species of players
