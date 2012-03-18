@@ -23,15 +23,15 @@ Philadelphia\\
 \maketitle
 \begin{abstract}
 \begin{quote}
-Human map designers lost a lot of time tunning their maps to make it well balanced. This paper presents an algorithm for generating balanced maps for the popular real-time strategy (RTS) game StarCraft. We use Voronoi diagrams to randomly generate polygons as starting point. Then different properties are assigned to the polygons with some fitness functions in order to make consistent and balanced maps.
+Game designers can spend a lot of time tuning their maps to make it well balanced. This paper presents an algorithm for generating balanced maps for the popular real-time strategy (RTS) game StarCraft. We use Voronoi diagrams to randomly generate polygons as starting point. Then different properties are assigned to the polygons with some fitness functions in order to make consistent and balanced maps.
 \end{quote}
 \end{abstract}
 
 
 \section{Introduction} % (fold)
 \label{sec:introduction}
-Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for ofﬂine content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the making possible of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
-This paper we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games. Our algorithm automatically generate balanced maps for a specific strategy game: Starcraft.
+Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for ofﬂine content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the possibility of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+In this paper, we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games, where balance is key. Our algorithm automatically generate balanced maps for a specific strategy game: Starcraft.
 % section introduction (end)
 
 
@@ -73,12 +73,12 @@ First of all we must set the size of the map and the number of regions desired. 
 \end{figure}
 
 \subsection{2. Compute Voronoi diagram}
-The second step is to compute the Voronoi diagram from a set of points. This is accomplished using the fast Fortune's Algorithm \cite{Fortune}. This approach use the idea of sweep line algorithms to design an efficient algorithm where its total time to process is O(\emph{n} log \emph{n}).
+The second step is to compute the Voronoi diagram from a set of points. This is accomplished using the fast Fortune's Algorithm \cite{Fortune}. This approach uses the idea of sweep line algorithms to design an efficient algorithm where its total time to process is O(\emph{n} log \emph{n}).
 
 \subsection{3. Add borders}
-The third step consist in generate the graph structure of regions. We represent region information as two related graphs: neighbors and edges.
+The third step consists of generating the graph structure of regions. We represent region information as two related graphs: neighbors and edges.
 
-The first graph has nodes for each adjacent region, which is useful for pathfinding algorithms. Notice that this graph is also knows as Delaunay triangulation.
+The first graph has nodes for each adjacent region, which is useful for pathfinding algorithms. This graph is also known as Delaunay triangulation.
 
 The second graph has nodes for each edge of the region. But the problem of Fortune's Algorithm is that it doesn't compute border map edges. To solve this we followed this steps:
 \begin{enumerate}
@@ -109,7 +109,7 @@ The fitness function to ensure this, it is an implementation of A* where the ini
 \end{figure}
 
 \subsection{5. Mirror map}
-In order to get a balanced map like those used in Starcraft competitions. We perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as we shown in Figure \ref{fig:mirrored-map}.
+In order to get a balanced map like those used in Starcraft competitions, we perform a mirror transform over axis $x$ and axis $y$. First we duplicate all regions subtracting to each $x$ value of duplicated edges the double size of the width map size. As a result we have a map of size $2(mapWidth) \times (mapHeight)$. Then we duplicate again all regions subtracting to each $y$ value of duplicated edges the double size of the height map size. As a result, we have a balanced map of size $2(mapWidth)  \times 2(mapHeight)$ as shown in Figure \ref{fig:mirrored-map}.
 
 \begin{figure}[ht]
     \centering
