@@ -44,7 +44,7 @@ In this paper, we present an approach to generating maps to real-time strategy g
 
 \section{Related work} % (fold)
 \label{sec:related_work}
-Santi said that we don't have to do this section...
+This is not the first time where Starcraft maps are used as a testbed to do research. Luke Perkins developed the library BWTA to do terrain analysis on Starcraft maps \cite{Perkins10}. Z\'{e}pir researched on a Starcraft 2D map conversion into a Warcraft III 3D map \cite{Zepir}. And Togelius et al. also presented a methodology based on search for generating Starcraft maps \cite{Togelius10}.
 % section related_work (end)
 
 
@@ -188,7 +188,16 @@ This algorithm has been implemented in C++ for the map generation and Ruby for t
 
 \section{Results} % (fold)
 \label{sec:results}
-Figure \ref{fig:final-maps} depicts maps resulting from our algorithm.
+Figure \ref{fig:final-maps} depicts maps resulting from our algorithm with different tilesets.
+
+Our PCG algorithm classify as follows:
+\begin{description}
+	\item[Offline] It takes place during game design.
+	\item[Necessary] The content generated is necessary to play a tournament game.
+	\item[Control vector] We defined some features (map size, number of regions, \% hills) which a game designer can decide.
+	\item[Stochastic] Given the same features the output is unpredictable.
+	\item[Constructive and Generate \& Test] Some steps are purely designed to give a valid output, but some others steps must satisfy a fitness function.
+\end{description}
 
 % section results (end)
 
