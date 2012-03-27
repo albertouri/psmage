@@ -11,8 +11,8 @@ std::ofstream fileLog("log.txt");
 RenderArea::RenderArea(QWidget *parent)
 :	QWidget(parent)
 {
-	mapWidth = 200;
-	mapHeight = 200;
+	renderMapWidth = 600;
+	renderMapHeight = 600;
 	numRegions = 10;
 	elevations = FALSE;
 	mapMirrored = FALSE;
@@ -32,14 +32,14 @@ void RenderArea::generateVoroni()
 
 	// Generate random points
 	for(int i=0; i<numRegions; i++) {
-		VPoint *seed = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
+		VPoint *seed = new VPoint( renderMapWidth * (double)rand()/(double)RAND_MAX , renderMapHeight * (double)rand()/(double)RAND_MAX );
 		ver->push_back(seed);
 		Region *newRegion = new Region(seed);
 		regions.push_back(newRegion);
 		pointsToRegion.insert(PointToRegionMap::value_type(seed, newRegion));
 	}
 	// Generate Voronoi edges
-	edg = v->GetEdges(ver, mapWidth, mapHeight);
+	edg = v->GetEdges(ver, renderMapWidth, renderMapHeight);
 
 	// Generate Regions Graph (and clipping edges)
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
@@ -47,9 +47,9 @@ void RenderArea::generateVoroni()
 		if ( !((int)(*i)->start->x == (int)(*i)->end->x && (int)(*i)->start->y == (int)(*i)->end->y) ) { // ignoring edge of length=0
 			// ignoring bad borders
 			if (!(((int)(*i)->start->x == 0 && (int)(*i)->end->x == 0) ||
-				((int)(*i)->start->x == mapWidth && (int)(*i)->end->x == mapWidth) ||
+				((int)(*i)->start->x == renderMapWidth && (int)(*i)->end->x == renderMapWidth) ||
 				((int)(*i)->start->y == 0 && (int)(*i)->end->y == 0) ||
-				((int)(*i)->start->y == mapHeight && (int)(*i)->end->y == mapHeight)) ) {
+				((int)(*i)->start->y == renderMapHeight && (int)(*i)->end->y == renderMapHeight)) ) {
 					PointToRegionMap::iterator found = pointsToRegion.find((*i)->left);
 					Region *region1 = found->second;
 					PointToRegionMap::iterator found2 = pointsToRegion.find((*i)->right);
@@ -76,10 +76,10 @@ void RenderArea::generateVoroni()
 			}
 
 			// Store x=max edges
-			if ((*j)->start->x >= mapWidth) {
+			if ((*j)->start->x >= renderMapWidth) {
 				xMaxedges.push_back((*j)->start);
 				xMaxedges.push_back((*j)->end);
-			} else if ((*j)->end->x >= mapWidth) {
+			} else if ((*j)->end->x >= renderMapWidth) {
 				xMaxedges.push_back((*j)->end);
 				xMaxedges.push_back((*j)->start);
 			}
@@ -94,10 +94,10 @@ void RenderArea::generateVoroni()
 			}
 
 			// Store y=max edges
-			if ((*j)->start->y >= mapHeight) {
+			if ((*j)->start->y >= renderMapHeight) {
 				yMaxedges.push_back((*j)->start);
 				yMaxedges.push_back((*j)->end);
-			} else if ((*j)->end->y >= mapHeight) {
+			} else if ((*j)->end->y >= renderMapHeight) {
 				yMaxedges.push_back((*j)->end);
 				yMaxedges.push_back((*j)->start);
 			}	
@@ -109,21 +109,21 @@ void RenderArea::generateVoroni()
 			double newY = (((*i)->seed->y-x0edges[0]->y)*(x0edges[1]->x-x0edges[0]->x)-((*i)->seed->x-x0edges[0]->x)*(x0edges[1]->y-x0edges[0]->y));
 			if ( newY < 0 ) goTopY = FALSE;
 			(*i)->minXborderMap = TRUE;
-			if (goTopY) { // we are at 0,mapHeight; check yMaxedges
-				(*i)->borders.push_back(new VEdge(x0edges[0], new VPoint(0, mapHeight)));
+			if (goTopY) { // we are at 0,renderMapHeight; check yMaxedges
+				(*i)->borders.push_back(new VEdge(x0edges[0], new VPoint(0, renderMapHeight)));
 				(*i)->maxYborderMap = TRUE;
 				if (yMaxedges.size() == 2) {
-					(*i)->borders.push_back(new VEdge(yMaxedges[0], new VPoint(0, mapHeight)));
+					(*i)->borders.push_back(new VEdge(yMaxedges[0], new VPoint(0, renderMapHeight)));
 				} else {
-					(*i)->borders.push_back(new VEdge(new VPoint(0, mapHeight), new VPoint(mapWidth, mapHeight)));
+					(*i)->borders.push_back(new VEdge(new VPoint(0, renderMapHeight), new VPoint(renderMapWidth, renderMapHeight)));
 					(*i)->maxXborderMap = TRUE;
 					if (xMaxedges.size() == 2) {
-						(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(mapWidth, mapHeight)));
+						(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(renderMapWidth, renderMapHeight)));
 					} else {
-						(*i)->borders.push_back(new VEdge(new VPoint(mapWidth, 0), new VPoint(mapWidth, mapHeight)));
+						(*i)->borders.push_back(new VEdge(new VPoint(renderMapWidth, 0), new VPoint(renderMapWidth, renderMapHeight)));
 						(*i)->minYborderMap = TRUE;
 						if (y0edges.size() == 2) { 
-							(*i)->borders.push_front(new VEdge(new VPoint(mapWidth, 0), y0edges[0]));
+							(*i)->borders.push_front(new VEdge(new VPoint(renderMapWidth, 0), y0edges[0]));
 						} else { /* UNEXPECTED END, MISSING EDGES? */ }
 					}	
 				}
@@ -133,15 +133,15 @@ void RenderArea::generateVoroni()
 				if (y0edges.size() == 2) {
 					(*i)->borders.push_back(new VEdge(y0edges[0], new VPoint(0, 0)));
 				} else {
-					(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(mapWidth, 0)));
+					(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(renderMapWidth, 0)));
 					(*i)->maxXborderMap = TRUE;
 					if (xMaxedges.size() == 2) {
-						(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(mapWidth, 0)));
+						(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(renderMapWidth, 0)));
 					} else {
-						(*i)->borders.push_back(new VEdge(new VPoint(mapWidth, 0), new VPoint(mapWidth, mapHeight)));
+						(*i)->borders.push_back(new VEdge(new VPoint(renderMapWidth, 0), new VPoint(renderMapWidth, renderMapHeight)));
 						(*i)->maxYborderMap = TRUE;
 						if (yMaxedges.size() == 2) { 
-							(*i)->borders.push_back(new VEdge(new VPoint(mapWidth, mapHeight), yMaxedges[0]));
+							(*i)->borders.push_back(new VEdge(new VPoint(renderMapWidth, renderMapHeight), yMaxedges[0]));
 						} else { /* UNEXPECTED END, MISSING EDGES? */ }
 					}	
 				}
@@ -164,17 +164,17 @@ void RenderArea::generateVoroni()
 			//if ( newY > (*i)->seed->y ) goTopY = FALSE;
 			(*i)->maxXborderMap = TRUE;
 			if (goTopY) {
-				(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(mapWidth, mapHeight)));
+				(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(renderMapWidth, renderMapHeight)));
 				(*i)->maxYborderMap = TRUE;
 				if (yMaxedges.size() == 2) {
-					(*i)->borders.push_back(new VEdge(yMaxedges[0], new VPoint(mapWidth, mapHeight)));
+					(*i)->borders.push_back(new VEdge(yMaxedges[0], new VPoint(renderMapWidth, renderMapHeight)));
 				} else {
-					(*i)->borders.push_back(new VEdge(new VPoint(0, mapHeight), new VPoint(mapWidth, mapHeight)));
+					(*i)->borders.push_back(new VEdge(new VPoint(0, renderMapHeight), new VPoint(renderMapWidth, renderMapHeight)));
 					(*i)->minXborderMap = TRUE;
 					if (x0edges.size() == 2) {
-						(*i)->borders.push_back(new VEdge(x0edges[0], new VPoint(0, mapHeight)));
+						(*i)->borders.push_back(new VEdge(x0edges[0], new VPoint(0, renderMapHeight)));
 					} else {
-						(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(0, mapHeight)));
+						(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(0, renderMapHeight)));
 						(*i)->minYborderMap = TRUE;
 						if (y0edges.size() == 2) { 
 							(*i)->borders.push_front(new VEdge(new VPoint(0, 0), y0edges[0]));
@@ -182,20 +182,20 @@ void RenderArea::generateVoroni()
 					}
 				}
 			} else {
-				(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(mapWidth, 0)));
+				(*i)->borders.push_back(new VEdge(xMaxedges[0], new VPoint(renderMapWidth, 0)));
 				(*i)->minYborderMap = TRUE;
 				if (y0edges.size() == 2) {
-					(*i)->borders.push_back(new VEdge(y0edges[0], new VPoint(mapWidth, 0)));
+					(*i)->borders.push_back(new VEdge(y0edges[0], new VPoint(renderMapWidth, 0)));
 				} else {
-					(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(mapWidth, 0)));
+					(*i)->borders.push_back(new VEdge(new VPoint(0, 0), new VPoint(renderMapWidth, 0)));
 					(*i)->minXborderMap = TRUE;
 					if (x0edges.size() == 2) {
 						(*i)->borders.push_back(new VEdge(x0edges[0], new VPoint(0, 0)));
 					} else {
-						(*i)->borders.push_back(new VEdge(new VPoint(0, mapHeight), new VPoint(0, 0)));
+						(*i)->borders.push_back(new VEdge(new VPoint(0, renderMapHeight), new VPoint(0, 0)));
 						(*i)->maxYborderMap = TRUE;
 						if (yMaxedges.size() == 2) { 
-							(*i)->borders.push_front(new VEdge(new VPoint(0, mapHeight), yMaxedges[0]));
+							(*i)->borders.push_front(new VEdge(new VPoint(0, renderMapHeight), yMaxedges[0]));
 						} else { /* UNEXPECTED END, MISSING EDGES? */ }
 					}
 				}
@@ -221,18 +221,18 @@ void RenderArea::generateVoroni()
 QSize RenderArea::minimumSizeHint() const
 {
 	return QSize(601, 601);
-	//return QSize(mapWidth, mapHeight);
+	//return QSize(renderMapWidth, renderMapHeight);
 }
 
 QSize RenderArea::sizeHint() const
 {
 	return QSize(601, 601);
-	//return QSize(mapWidth, mapHeight);
+	//return QSize(renderMapWidth, renderMapHeight);
 }
 
 int RenderArea::getMapSize() const
 {
-	return mapHeight;
+	return renderMapHeight;
 }
 
 int RenderArea::getNumRegions() const
@@ -240,11 +240,9 @@ int RenderArea::getNumRegions() const
 	return numRegions;
 }
 
-void RenderArea::generateRegions(int size, int numRegions)
+void RenderArea::generateRegions(int numRegions)
 {
 	this->numRegions = numRegions;
-	this->mapWidth = size;
-	this->mapHeight = size;
 	delete ver;
 	elevations = FALSE;
 	mapMirrored = FALSE;
@@ -298,10 +296,10 @@ void RenderArea::mirroringMap()
 			yRegions.push_back(newRegion);
 		}
 		for(RegionSet::iterator i = yRegions.begin(); i!= yRegions.end(); ++i) {
-			(*i)->seed->y = (mapHeight*2)-(*i)->seed->y;
+			(*i)->seed->y = (renderMapHeight*2)-(*i)->seed->y;
 			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-				(*j)->start->y = (mapHeight*2)-(*j)->start->y;
-				(*j)->end->y = (mapHeight*2)-(*j)->end->y;
+				(*j)->start->y = (renderMapHeight*2)-(*j)->start->y;
+				(*j)->end->y = (renderMapHeight*2)-(*j)->end->y;
 			}
 		}
 		// concatenate vectors
@@ -322,10 +320,10 @@ void RenderArea::mirroringMap()
 			xRegions.push_back(newRegion);
 		}
 		for(RegionSet::iterator i = xRegions.begin(); i!= xRegions.end(); ++i) {
-			(*i)->seed->x = (mapWidth*2)-(*i)->seed->x;
+			(*i)->seed->x = (renderMapWidth*2)-(*i)->seed->x;
 			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-				(*j)->start->x = (mapWidth*2)-(*j)->start->x;
-				(*j)->end->x = (mapWidth*2)-(*j)->end->x;
+				(*j)->start->x = (renderMapWidth*2)-(*j)->start->x;
+				(*j)->end->x = (renderMapWidth*2)-(*j)->end->x;
 			}
 		}
 		// concatenate vectors
@@ -344,9 +342,7 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 	//painter.drawRect(QRect(0, 0, width()-1, height()-1));
 
 	if (mapMirrored) {
-		painter.scale(600/(mapWidth*2.0), 600/(mapHeight*2.0));
-	} else {
-		painter.scale(600/mapWidth, 600/mapHeight);
+		painter.scale(0.5, 0.5);
 	}
 
 	// Draw Regions
@@ -394,56 +390,42 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 
 	// Draw Voronoi Edges
-	//painter.setPen(QPen(Qt::red, 0));
-	//for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
-	//	painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
-	//}
 	painter.setPen(palette().dark().color());
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
 		for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-			//clipping((*j)->start, (*j)->end);
 			painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
 		}
 	}
 
-	if (!mapMirrored) {
-		painter.resetTransform();
-		// Draw Random Points
-		QPoint points[maxRegions];
-		int j = 0;
-		for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i) {
-			points[j] = QPoint((*i)->x*(600/mapWidth), (*i)->y*(600/mapWidth));
-			j++;
-		}
-		painter.setPen(QPen(Qt::blue, 3));
-		painter.drawPoints(points, numRegions);
+
+	// Draw Random Points
+	painter.resetTransform();
+	QPoint points[maxRegions*4]; // TODO better use of memory
+	int j = 0;
+	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
+		if (mapMirrored) points[j] = QPoint((*i)->seed->x*0.5, (*i)->seed->y*0.5);
+		else points[j] = QPoint((*i)->seed->x, (*i)->seed->y);
+		j++;
 	}
+	painter.setPen(QPen(Qt::blue, 3));
+	painter.drawPoints(points, j);
 
 }
 
-void RenderArea::generateTXT()
+void RenderArea::generateTXT(int size)
 {
-	int finalWidth = mapWidth;
-	int finalHeight = mapHeight;
-	if (mapMirrored) {
-		finalWidth = mapWidth*2;
-		finalHeight = mapHeight*2;
-	}
 	// Paint ******
 	// Color brushes
 	QColor *Qblack = new QColor(Qt::black);
 	QColor *Qblue = new QColor(Qt::blue);
 	QColor *Qgreen = new QColor(Qt::green);
 	QColor *Qyellow = new QColor(Qt::yellow);
-	QImage myQImage(finalWidth, finalHeight, QImage::Format_RGB32);
+	QImage myQImage(renderMapWidth*2, renderMapHeight*2, QImage::Format_RGB32);
 	QPainter painter(&myQImage);
 	// Set background
-	painter.fillRect(0, 0, finalWidth, finalHeight, Qt::white);
+	painter.fillRect(0, 0, renderMapWidth*2, renderMapHeight*2, Qt::white);
 	// Draw Voronoi Edges
 	painter.setBrush(Qt::black);
- 	//for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
- 	//	painter.drawLine((*i)->start->x, (*i)->start->y, (*i)->end->x, (*i)->end->y);
- 	//}
 	// Draw Regions
 	if (elevations) {
 		for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
@@ -488,12 +470,14 @@ void RenderArea::generateTXT()
 	}
 	painter.end();
 
+	// Scale image
+	myQImage = myQImage.scaled(size, size);
 
 	// Print TXT ************
 	QColor *color = new QColor;
 	std::ofstream fileTxt("map.txt");
-	for (int i=0; i<finalWidth; i++) {
-		for (int j=0; j<finalHeight; j++) {
+	for (int i=0; i<size; i++) { //finalWidth
+		for (int j=0; j<size; j++) { //finalHeight
 			color->setRgb(myQImage.pixel(j,i));
 			if (color->name() == Qblue->name())
 				fileTxt << 0;
@@ -523,11 +507,11 @@ OutCode RenderArea::computeOutCode(VPoint *p1)
 
 	if (p1->x < 0)           // to the left of clip window
 		code |= LEFT;
-	else if (p1->x > mapWidth)      // to the right of clip window
+	else if (p1->x > renderMapWidth)      // to the right of clip window
 		code |= RIGHT;
 	if (p1->y < 0)           // below the clip window
 		code |= BOTTOM;
-	else if (p1->y > mapHeight)      // above the clip window
+	else if (p1->y > renderMapHeight)      // above the clip window
 		code |= TOP;
 
 	return code;
@@ -560,14 +544,14 @@ void RenderArea::clipping(VPoint *p1, VPoint *p2)
 			// Now find the intersection point;
 			// use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
 			if (outcodeOut & TOP) {           // point is above the clip rectangle
-				x = p1->x + (p2->x - p1->x) * ((double)mapHeight - p1->y) / (p2->y - p1->y);
-				y = (double)mapHeight;
+				x = p1->x + (p2->x - p1->x) * ((double)renderMapHeight - p1->y) / (p2->y - p1->y);
+				y = (double)renderMapHeight;
 			} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
 				x = p1->x + (p2->x - p1->x) * ((double)0 - p1->y) / (p2->y - p1->y);
 				y = (double)0;
 			} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-				y = p1->y + (p2->y - p1->y) * ((double)mapWidth - p1->x) / (p2->x - p1->x);
-				x = (double)mapWidth;
+				y = p1->y + (p2->y - p1->y) * ((double)renderMapWidth - p1->x) / (p2->x - p1->x);
+				x = (double)renderMapWidth;
 			} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
 				y = p1->y + (p2->y - p1->y) * ((double)0 - p1->x) / (p2->x - p1->x);
 				x = (double)0;

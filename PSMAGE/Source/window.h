@@ -8,6 +8,7 @@ class QLabel;
 class QSpinBox;
 class QPushButton;
 class QLineEdit;
+class QComboBox;
 
 class Window : public QWidget
 {
@@ -25,7 +26,7 @@ private slots:
 private:
 	RenderArea *renderArea;
 	QLabel *mapSizeLabel;
-	QSpinBox *mapSizeBox;
+	QComboBox *mapSizeBox;
 	QLabel *regionsLabel;
 	QSpinBox *regionsSpinBox;
 	QPushButton *toTxtButton;

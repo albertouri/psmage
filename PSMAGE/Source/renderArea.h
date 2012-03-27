@@ -37,10 +37,10 @@ public:
 	int getMapSize() const;
 
 public slots:
-	void generateRegions(int size, int numRegions);
+	void generateRegions(int numRegions);
 	void generateElevations();
 	void mirroringMap();
-	void generateTXT();
+	void generateTXT(int size);
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -59,8 +59,8 @@ private:
 	vor::Vertices yMaxedges;
 
 	int numRegions;
-	int mapWidth;
-	int mapHeight;
+	int renderMapWidth;
+	int renderMapHeight;
 	bool elevations;
 	bool mapMirrored;
 

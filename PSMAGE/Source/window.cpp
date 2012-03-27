@@ -8,9 +8,15 @@ Window::Window()
 	// Widgets
 	renderArea = new RenderArea;
 
-	mapSizeBox = new QSpinBox;
-	mapSizeBox->setRange(50, 500);
-	mapSizeBox->setValue(renderArea->getMapSize());
+	mapSizeBox = new QComboBox;
+	// remember: 
+	//	walk tiles are (8x8) pixels
+	//	build tiles are (32x32) pixels
+	mapSizeBox->addItem("64x64", QVariant(64*4));
+	mapSizeBox->addItem("96x96", QVariant(96*4));
+	mapSizeBox->addItem("128x128", QVariant(128*4));
+	mapSizeBox->addItem("196x196", QVariant(196*4));
+	mapSizeBox->addItem("256x256", QVariant(256*4));
 	mapSizeLabel = new QLabel(tr("Map size:"));
 	mapSizeLabel->setBuddy(mapSizeBox);
 
@@ -35,13 +41,13 @@ Window::Window()
 	// Layout
 	QGridLayout *mainLayout = new QGridLayout;
 	mainLayout->addWidget(renderArea, 0, 2, 7, 1);
-	mainLayout->addWidget(mapSizeLabel, 0, 0, Qt::AlignRight);
-	mainLayout->addWidget(mapSizeBox, 0, 1);
-	mainLayout->addWidget(regionsLabel, 1, 0, Qt::AlignRight);
-	mainLayout->addWidget(regionsSpinBox, 1, 1);
-	mainLayout->addWidget(generateRegionsButton, 2, 0, 1, 2);
-	mainLayout->addWidget(genElevationsButton, 3, 0, 1, 2);
-	mainLayout->addWidget(mirroringButton, 4, 0, 1, 2);
+	mainLayout->addWidget(regionsLabel, 0, 0, Qt::AlignRight);
+	mainLayout->addWidget(regionsSpinBox, 0, 1);
+	mainLayout->addWidget(generateRegionsButton, 1, 0, 1, 2);
+	mainLayout->addWidget(genElevationsButton, 2, 0, 1, 2);
+	mainLayout->addWidget(mirroringButton, 3, 0, 1, 2);
+	mainLayout->addWidget(mapSizeLabel, 4, 0, Qt::AlignRight);
+	mainLayout->addWidget(mapSizeBox, 4, 1);
 	mainLayout->addWidget(toTxtButton, 5, 0, 1, 2);
 	mainLayout->setRowStretch(6, 50);
 	setLayout(mainLayout);
@@ -51,7 +57,7 @@ Window::Window()
 
 void Window::generateRegions()
 {
-	renderArea->generateRegions(mapSizeBox->value(), regionsSpinBox->value());
+	renderArea->generateRegions(regionsSpinBox->value());
 }
 
 void Window::generateElevations()
@@ -66,5 +72,6 @@ void Window::mirroring()
 
 void Window::generateTXT()
 {
-	renderArea->generateTXT();
+	int mapSize = mapSizeBox->itemData(mapSizeBox->currentIndex()).toInt();
+	renderArea->generateTXT(mapSize);
 }
