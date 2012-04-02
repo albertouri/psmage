@@ -1,7 +1,9 @@
 #include <QtGui>
 #include <time.h>
+#include<sstream>
 #include "renderArea.h"
 //#include "Voronoi.h"
+#include "MapSection.h"
 
 
 #include <fstream>
@@ -414,6 +416,24 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 void RenderArea::generateTXT(int size)
 {
+	//std::ofstream myfile("test2.chk",std::ios::binary);
+
+	//std::string test = "VER ";
+	//short v = 205;
+	//int dataSize = 2;
+	//myfile.write(test.data(), test.size());
+	//myfile.write(reinterpret_cast<const char*>(&dataSize), sizeof(int));
+	//myfile.write(reinterpret_cast<const char*>(&v), sizeof(short));
+
+	//myfile.close();
+
+	MapSection mapBuffer;
+	//mapBuffer.writeHeader();
+	mapBuffer.generateFile();
+
+	return;
+
+
 	// Paint ******
 	// Color brushes
 	QColor *Qblack = new QColor(Qt::black);
