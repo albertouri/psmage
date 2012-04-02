@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="PSMAGE"
 	ProjectGUID="{36FF1134-E7D8-441A-8C2B-5CCBC3FF9BB7}"
 	RootNamespace="PSMAGE"
@@ -515,11 +515,11 @@
 			Name="Converter"
 			>
 			<File
-				RelativePath=".\Source\MapSection.cpp"
+				RelativePath=".\Source\MapFormat.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\MapSection.h"
+				RelativePath=".\Source\MapFormat.h"
 				>
 			</File>
 		</Filter>

@@ -3,7 +3,7 @@
 #include<sstream>
 #include "renderArea.h"
 //#include "Voronoi.h"
-#include "MapSection.h"
+#include "MapFormat.h"
 
 
 #include <fstream>
@@ -427,7 +427,7 @@ void RenderArea::generateTXT(int size)
 
 	//myfile.close();
 
-	MapSection mapBuffer;
+	MapFormat mapBuffer;
 	//mapBuffer.writeHeader();
 	mapBuffer.generateFile();
 
