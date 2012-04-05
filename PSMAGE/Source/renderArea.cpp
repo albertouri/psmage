@@ -416,24 +416,6 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 void RenderArea::generateTXT(int size)
 {
-	//std::ofstream myfile("test2.chk",std::ios::binary);
-
-	//std::string test = "VER ";
-	//short v = 205;
-	//int dataSize = 2;
-	//myfile.write(test.data(), test.size());
-	//myfile.write(reinterpret_cast<const char*>(&dataSize), sizeof(int));
-	//myfile.write(reinterpret_cast<const char*>(&v), sizeof(short));
-
-	//myfile.close();
-
-	MapFormat mapBuffer;
-	//mapBuffer.writeHeader();
-	mapBuffer.generateFile();
-
-	return;
-
-
 	// Paint ******
 	// Color brushes
 	QColor *Qblack = new QColor(Qt::black);
@@ -493,24 +475,34 @@ void RenderArea::generateTXT(int size)
 	// Scale image
 	myQImage = myQImage.scaled(size, size);
 
-	// Print TXT ************
+	// Build Map Info ************
 	QColor *color = new QColor;
-	std::ofstream fileTxt("map.txt");
+	//std::ofstream fileTxt("map.txt");
+	mapInfo = new short*[size];
 	for (int i=0; i<size; i++) { //finalWidth
+		mapInfo[i] = new short[size];
 		for (int j=0; j<size; j++) { //finalHeight
 			color->setRgb(myQImage.pixel(j,i));
 			if (color->name() == Qblue->name())
-				fileTxt << 0;
+				//fileTxt << 0;
+				mapInfo[i][j] = 0;
 			else if (color->name() == Qgreen->name())
-				fileTxt << 1;
+				//fileTxt << 1;
+				mapInfo[i][j] = 1;
 			else if (color->name() == Qyellow->name())
-				fileTxt << 2;
+				//fileTxt << 2;
+				mapInfo[i][j] = 2;
 			else
-				fileTxt << 0;
+				//fileTxt << 0;
+				mapInfo[i][j] = 0;
 		}
-		fileTxt << std::endl;
+		//fileTxt << std::endl;
 	}
-	fileTxt.close();
+	//fileTxt.close();
+
+	MapFormat mapBuffer(size, size);
+	mapBuffer.importMap(mapInfo);
+	mapBuffer.generateFile();
 }
 
 

@@ -12,11 +12,11 @@ Window::Window()
 	// remember: 
 	//	walk tiles are (8x8) pixels
 	//	build tiles are (32x32) pixels
-	mapSizeBox->addItem("64x64", QVariant(64*4));
-	mapSizeBox->addItem("96x96", QVariant(96*4));
-	mapSizeBox->addItem("128x128", QVariant(128*4));
-	mapSizeBox->addItem("196x196", QVariant(196*4));
-	mapSizeBox->addItem("256x256", QVariant(256*4));
+	mapSizeBox->addItem("64x64", QVariant(64));
+	mapSizeBox->addItem("96x96", QVariant(96));
+	mapSizeBox->addItem("128x128", QVariant(128));
+	mapSizeBox->addItem("196x196", QVariant(196));
+	mapSizeBox->addItem("256x256", QVariant(256));
 	mapSizeLabel = new QLabel(tr("Map size:"));
 	mapSizeLabel->setBuddy(mapSizeBox);
 
@@ -26,7 +26,7 @@ Window::Window()
 	regionsLabel = new QLabel(tr("# Regions:"));
 	regionsLabel->setBuddy(regionsSpinBox);
 
-	toTxtButton = new QPushButton(tr("Generate TXT Map"));
+	toTxtButton = new QPushButton(tr("Generate CHK Map"));
 	generateRegionsButton = new QPushButton(tr("Generate Regions"));
 	genElevationsButton = new QPushButton(tr("Generate Elevations"));
 	mirroringButton = new QPushButton(tr("Mirroring Map"));

@@ -63,6 +63,7 @@ private:
 	int renderMapHeight;
 	bool elevations;
 	bool mapMirrored;
+	short** mapInfo;
 
 	void generateVoroni();
 	OutCode computeOutCode(VPoint *p1);

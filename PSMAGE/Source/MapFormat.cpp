@@ -2,12 +2,31 @@
 
 
 
-MapFormat::MapFormat()
+MapFormat::MapFormat(short mapWidth, short mapHeight)
 {
-	short size = 64;
-	short width = size;
-	short height = size;
+	width = mapWidth;
+	height = mapHeight;
+	static const short const1[] = {32,33,34,35,36,37,38,39,40,42,43,44,45,46,48,49,50,51,52,53,54,55,56,58,59,60,61,62};
+	std::vector<short> vector1(const1, const1+sizeOfArray(const1));
+	normalTerrain1.insert( normalTerrain1.end(), vector1.begin(), vector1.end() );
 
+	static const short const2[] = {64,65,66,67,68,69,70,71,72,74,75,76,77,78,80,81,82,83,84,85,86,87,88,90,91,92,93,94};
+	std::vector<short> vector2(const2, const2+sizeOfArray(const2));
+	highTerrain1.insert( highTerrain1.end(), vector2.begin(), vector2.end() );
+}
+
+MapFormat::~MapFormat()
+{
+}
+
+void MapFormat::writeHeader(std::string name, int size)
+{
+	writeBytes(name);
+	writeBytes(size);
+}
+
+void MapFormat::generateFile()
+{
 	// CHK format specification: 
 	//	http://quantam.devklog.net/CHKFormat.htm
 	//	http://www.staredit.net/starcraft/CHK
@@ -210,7 +229,8 @@ MapFormat::MapFormat()
 	// Section 'MTXM' [REQUIRED] - Graphical tile map section (includes doodads as terrain)
 	// Used only by Starcraft (not on Staredit)
 	writeHeader("MTXM", width*height*2);
-	for (int i = 0; i < width*height; i++) { writeBytes((short)37); }
+	//for (int i = 0; i < width*height; i++) { writeBytes((short)37); }
+	writeBytes(mapBuffer);
 
 	// --------------------------------------------------------------------------------------------------
 	// Section 'PUNI' [REQUIRED] - Player unit restrictions (all 1s for normal defaults)
@@ -237,7 +257,8 @@ MapFormat::MapFormat()
 	// Section 'TILE' - Tile map of level's terrain (NOT includes doodads, this info is stored in DD2)
 	// Used only by Staredit. size = width * height ints - 1 int
 	writeHeader("TILE", width*height*2);
-	for (int i = 0; i < width*height; i++) { writeBytes((short)37); }
+	//for (int i = 0; i < width*height; i++) { writeBytes((short)37); }
+	writeBytes(mapBuffer);
 
 	// --------------------------------------------------------------------------------------------------
 	// Section 'DD2 ' - Doodad map of level (used only by Staredit)
@@ -269,7 +290,7 @@ MapFormat::MapFormat()
 	writeBytes((std::string)"Force 2");writeBytes((char)0x00);
 	writeBytes((std::string)"Force 3");writeBytes((char)0x00);
 	writeBytes((std::string)"Force 4");writeBytes((char)0x00);
-	
+
 
 	// --------------------------------------------------------------------------------------------------
 	// Section 'UPRP' [REQUIRED] - Trigger unit properties section
@@ -821,7 +842,7 @@ MapFormat::MapFormat()
 	writeBytes((__int64)0x0000000000000000);
 	writeBytes((__int64)0x0000000000000000);
 	writeBytes((__int64)0x0000000000000000);
-	
+
 	// --------------------------------------------------------------------------------------------------
 	// Section 'UPGx' - Extended upgrades settings section (only present on SCX maps)
 	writeHeader("UPGx", 794);
@@ -938,22 +959,26 @@ MapFormat::MapFormat()
 	writeBytes((__int64)0x0064006400640064);
 	writeBytes((__int32)0x00640064);
 
-}
-
-MapFormat::~MapFormat()
-{
-}
-
-void MapFormat::writeHeader(std::string name, int size)
-{
-	writeBytes(name);
-	writeBytes(size);
-}
-
-void MapFormat::generateFile()
-{
+	// Write buffer on file
 	std::ofstream myfile("test.chk", std::ios::binary);
 	myfile.write(&buffer[0], buffer.size());
 	myfile.close();
-	return;
+}
+
+void MapFormat::importMap(short** mapInfo)
+{
+	int randomTile;
+	for (int x=0; x<width; x++) {
+		for (int y=0; y<height; y++) {
+			if (mapInfo[x][y] == 1) {
+				randomTile = rand() % normalTerrain1.size();
+				writeMapBytes((short)normalTerrain1[randomTile]);
+			} else if (mapInfo[x][y] == 2) {
+				randomTile = rand() % highTerrain1.size();
+				writeMapBytes((short)highTerrain1[randomTile]);
+			} else {
+				writeMapBytes((short)41);
+			}
+		}
+	}
 }
