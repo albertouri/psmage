@@ -1,5 +1,6 @@
 #include <QtGui>
 #include <time.h>
+#include <math.h>
 #include<sstream>
 #include "renderArea.h"
 //#include "Voronoi.h"
@@ -248,6 +249,8 @@ void RenderArea::generateRegions(int numRegions)
 	delete ver;
 	elevations = FALSE;
 	mapMirrored = FALSE;
+	downToHigh.clear();
+	highToDown.clear();
 	ver = new vor::Vertices();
 	generateVoroni();
 	update();
@@ -273,6 +276,59 @@ void RenderArea::generateElevations()
 			regions[regionID]->elevation = 2;
 			hillRegions++;
 		//}
+	}
+
+	downToHigh.clear();
+	highToDown.clear();
+	// Generate hill up edges
+	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
+		if ((*i)->elevation == 2) { // Iterate over edges of high regions
+			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+				// ignoring map border edges
+				if (!(((int)(*j)->start->x == 0 && (int)(*j)->end->x == 0) ||
+					((int)(*j)->start->x == renderMapWidth && (int)(*j)->end->x == renderMapWidth) ||
+					((int)(*j)->start->y == 0 && (int)(*j)->end->y == 0) ||
+					((int)(*j)->start->y == renderMapHeight && (int)(*j)->end->y == renderMapHeight)) ) {
+						PointToRegionMap::iterator left = pointsToRegion.find((*j)->left);
+						PointToRegionMap::iterator right = pointsToRegion.find((*j)->right);
+						// ignoring regions with same elevation
+						if (left->second->elevation == right->second->elevation) continue;
+						Region *downRegion = left->second;
+						if (left->second == *i) downRegion = right->second;
+						// calculate slope
+						VPoint *start = (*j)->start;
+						VPoint *end = (*j)->end;
+						if (start->x > end->x) {
+							VPoint *tmp = start;
+							start = end;
+							end = tmp;
+						}
+						double dx = end->x - start->x;
+						double dy = end->y - start->y;
+						double slope = 0;
+						if (dx!=0) slope = dy / dx;
+
+						double distanceToHigh = sqrt(pow((*i)->seed->x - start->x, 2) + pow((*i)->seed->y - end->y, 2));
+						double distanceToDown = sqrt(pow(downRegion->seed->x - start->x, 2) + pow(downRegion->seed->y - end->y, 2));
+
+						// check direction of the hill
+						if (slope >= 0) {
+							if (distanceToHigh < distanceToDown) {
+								highToDown.push_back(*j);
+							} else {
+								downToHigh.push_back(*j);
+							}
+						} else {
+							if (distanceToHigh < distanceToDown) {
+								downToHigh.push_front(*j);
+							} else {
+								highToDown.push_front(*j);
+							}
+						}
+
+				}
+			}
+		}
 	}
 
 	update();
@@ -399,6 +455,18 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 		}
 	}
 
+	// Draw down to high edges
+	painter.setPen(QPen(Qt::red));
+	for(vor::Edges::iterator j = downToHigh.begin(); j!= downToHigh.end(); ++j) {
+		painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
+	}
+
+	// Draw high to down edges
+	painter.setPen(QPen(Qt::blue));
+	for(vor::Edges::iterator j = highToDown.begin(); j!= highToDown.end(); ++j) {
+		painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
+	}
+
 
 	// Draw Random Points
 	painter.resetTransform();
@@ -499,6 +567,10 @@ void RenderArea::generateTXT(int size)
 		//fileTxt << std::endl;
 	}
 	//fileTxt.close();
+
+
+
+
 
 	MapFormat mapBuffer(size, size);
 	mapBuffer.importMap(mapInfo);

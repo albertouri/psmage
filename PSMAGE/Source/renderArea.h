@@ -65,6 +65,9 @@ private:
 	bool mapMirrored;
 	short** mapInfo;
 
+	vor::Edges downToHigh;
+	vor::Edges highToDown;
+
 	void generateVoroni();
 	OutCode computeOutCode(VPoint *p1);
 	void clipping(VPoint *p1, VPoint *p2);

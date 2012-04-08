@@ -18,9 +18,8 @@ namespace vor
 		Useful data containers for Vertices (places) and Edges of Voronoi diagram
 	*/
 
-	//typedef std::list<VPoint *>		Vertices	;
-	typedef std::vector<VPoint *>		Vertices	;
-	typedef std::list<VEdge *>		Edges		;
+	typedef std::vector<VPoint *>	Vertices;
+	typedef std::list<VEdge *>		Edges;
 
 	/*
 		Class for generating the Voronoi diagram
