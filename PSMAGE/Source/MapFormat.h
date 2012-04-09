@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <time.h>
 
 
@@ -18,6 +19,7 @@ public:
 
 	void generateFile();
 	void importMap(short** mapInfo);
+	void drawLineDownToHigh(int x0, int y0, int x1, int y1);
 protected:
 	std::string headerName;
 	int dataSize;
@@ -30,6 +32,13 @@ protected:
 	std::vector<short> highTerrain1;
 	
 private:
+	struct moveMapPoint {
+		short x;
+		short y;
+		bool printCorner;
+		bool toDown;
+	};
+
 	template < class T >
 	void writeBytes( const T s ) {
 		buffer.insert(buffer.end(), reinterpret_cast<const char*>( &s ), reinterpret_cast<const char*>( &s ) + sizeof( T ));
@@ -43,6 +52,21 @@ private:
 	void writeMapBytes( std::string text ) { mapBuffer.insert( mapBuffer.end(), text.begin(), text.end() ); }
 
 	void writeHeader(std::string name, int size);
+
+	moveMapPoint rectifyInitialPoint1(int x, int y);
+	moveMapPoint rectifyInitialPoint2(int x, int y);
+
+	void editMapTile(int x, int y, short tileId);
+	short readMapTile(int x, int y);
+	void writeTile1(int x, int y);
+	void writeTile2(int x, int y);
+	void writeTile3(int x, int y);
+	void writeTile4(int x, int y);
+	void writeTile5(int x, int y);
+	void writeTile6(int x, int y);
+	void writeTile7(int x, int y);
+	void writeTile8(int x, int y);
+	bool isTileXY(short tileId, int x, int y);
 
 	short width;
 	short height;

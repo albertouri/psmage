@@ -1,7 +1,6 @@
 #include "MapFormat.h"
 
 
-
 MapFormat::MapFormat(short mapWidth, short mapHeight)
 {
 	width = mapWidth;
@@ -981,4 +980,297 @@ void MapFormat::importMap(short** mapInfo)
 			}
 		}
 	}
+}
+
+void MapFormat::writeTile1(int x, int y)
+{
+	//buffer[y  , x], buffer[y  , x+1] = 1, 1
+	//buffer[y-1, x], buffer[y-1, x+1] = 1, 1
+	//buffer[y-2, x], buffer[y-2, x+1] = 1, 1
+}
+
+void MapFormat::writeTile2(int x, int y)
+{
+	//buffer[y  , x], buffer[y  , x+1] = 2, 2
+	//buffer[y-1, x], buffer[y-1, x+1] = 2, 2
+	//buffer[y-2, x], buffer[y-2, x+1] = 2, 2
+}
+
+void MapFormat::writeTile3(int x, int y)
+{
+	//buffer[y+1, x], buffer[y+1, x+1] = 3, 3
+	//buffer[y  , x], buffer[y  , x+1] = 3, 3
+	//buffer[y-1, x], buffer[y-1, x+1] = 3, 3
+}
+
+void MapFormat::writeTile4(int x, int y)
+{
+	//buffer[y  , x  ], buffer[y  , x+1] = 4, 4
+	//buffer[y-1, x-1], buffer[y-1, x  ], buffer[y-1, x+1] = 4, 4, 4
+	//buffer[y-2, x-2], buffer[y-2, x-1] = 3, 3
+	//buffer[y-3, x-2], buffer[y-3, x-1] = 3, 3
+}
+
+void MapFormat::writeTile5(int x, int y)
+{
+	//buffer[y  , x  ], buffer[y  , x+1] = 5, 5
+	//buffer[y-1, x-1], buffer[y-1, x  ], buffer[y-1, x+1] = 5, 5, 5
+	//buffer[y-2, x-2], buffer[y-2, x-1] = 3, 3
+	//buffer[y-3, x-2], buffer[y-3, x-1] = 3, 3
+}
+
+void MapFormat::writeTile6(int x, int y)
+{
+	//buffer[y  , x], buffer[y  , x+1] = 6, 6
+	//buffer[y-1, x], buffer[y-1, x+1] = 6, 6
+	//buffer[y-2, x], buffer[y-2, x+1] = 6, 6
+}
+
+void MapFormat::writeTile7(int x, int y)
+{
+	//buffer[y  , x], buffer[y  , x+1] = 6, 6
+	//buffer[y-1, x], buffer[y-1, x+1] = 6, 6
+	//buffer[y-2, x  ], buffer[y-2, x+1] = 7, 7
+	//buffer[y-2, x-2], buffer[y-2, x-1] = 7, 7
+	//buffer[y-1, x-2], buffer[y-1, x-1] = 7, 7
+}
+
+void MapFormat::writeTile8(int x, int y)
+{
+	//buffer[y  , x], buffer[y  , x+1] = 8, 8
+	//buffer[y-1, x-2], buffer[y-1, x-1], buffer[y-1, x], buffer[y-1, x+1] = 8, 8, 8, 8
+	//buffer[y-2, x-2], buffer[y-2, x-1], buffer[y-2, x], buffer[y-2, x+1] = 8, 8, 8, 8
+}
+
+bool MapFormat::isTileXY(short tileId, int x, int y)
+{
+	return false;
+}
+
+MapFormat::moveMapPoint MapFormat::rectifyInitialPoint1(int x, int y)
+{
+	moveMapPoint move;
+	move.x = 0;
+	move.y = 0;
+	move.printCorner = false;
+	move.toDown = false;
+
+	return move;
+}
+
+MapFormat::moveMapPoint MapFormat::rectifyInitialPoint2(int x, int y)
+{
+	moveMapPoint move;
+	move.x = 0;
+	move.y = 0;
+	move.printCorner = false;
+	move.toDown = false;
+
+	return move;
+}
+
+void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
+{
+	if (x0 > x1){
+		std::swap(x0, x1);
+		std::swap(y0, y1);
+	}
+
+	int dx = x1 - x0;
+	int dy = y1 - y0;
+
+	// check assumption 2 (slope)
+	double slope = 0;
+	if (dx!=0) slope = double(dy) / double(dx);
+
+	int x = x0;
+	int y = y0;
+	int xSteps = 0;
+	int ySteps = 0;
+	bool lastStepUp = true;
+	bool lastStepDown = true;
+
+	if (slope > 0.5 || (slope == 0 && y0 < y1)){ // always +y, conditionally +x
+		double D = 2 * dx - dy;
+
+		// Adjust start point looking neighbors
+		moveMapPoint move = rectifyInitialPoint2(x,y);
+		D += 2 * ((dx*move.y) - (dy*move.x));
+		x += move.x;
+		y += move.y;
+
+		if (D <= 0 || (move.toDown && D > 0) ) {
+			writeTile2(x,y);
+			x += 2;
+			y += 1;
+			D += 2 * (dx - (dy*2));
+		}
+
+		while (y <= y1) {
+			if (D <= 0) {
+				if (isTileXY(6, x, y-2)) writeTile7(x,y);
+				else writeTile6(x,y);
+				xSteps = 0;
+				ySteps = 2;
+				lastStepUp = false;
+			} else {
+				if (isTileXY(6, x, y-2)) writeTile8(x,y);
+				else writeTile2(x,y);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepUp = true;
+			}
+			D += 2 * ((dx*ySteps) - (dy*xSteps));
+			x += xSteps;
+			y += ySteps;
+		}
+
+		// Add final corner
+		if (lastStepUp) writeTile6(x,y);
+
+	} else if (slope > 0 || (slope == 0 && x0 < x1)) { // always +x, conditionally +y
+		double D = 2 * dy - dx;
+
+		// Adjust start point  looking neighbors
+		moveMapPoint move = rectifyInitialPoint2(x,y);
+		D += 2 * ((dy*move.x) - (dx*move.y));
+		x += move.x;
+		y += move.y;
+
+		if (D <= 0) {
+			D += 2 * (dy*-2);
+			x -= 2;
+		} else {
+			D += 2 * (- (dx*-1));
+			y += -1;
+		}
+		if (move.toDown && D <= 0) {
+			// undo moves
+			D -= 2 * (dy*-2);
+			x += 2;
+			D += 2 * (- (dx*-1));
+			y += -1;
+			// write tile 2
+			writeTile2(x,y+1);
+			D += 2 * ((dy*2) - dx);
+			x += 2;
+			y += 1;
+		}
+
+		while (x <= x1) {
+			if (D <= 0) {
+				writeTile1(x,y);
+				xSteps = 2;
+				ySteps = -1;
+				lastStepUp = false;
+			} else {
+				writeTile2(x,y+1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepUp = true;
+			}
+			D += 2 * ((dy*xSteps) - (dx*ySteps));
+			x += xSteps;
+			y += ySteps;
+		}
+
+		// Add final corner
+		if (lastStepUp) {
+			writeTile6(x,y+1);
+		} else {
+			writeTile6(x-2,y+2);
+			//buffer[y-1, x-2], buffer[y-1, x-1] = 0, 0 # cuidado!!! esto es poner el tile en low
+		}
+
+	} else if (slope > -0.5 && slope != 0) { // always +x, conditionally -y
+		dy = abs(dy);
+		double D = 2 * dy - dx;
+
+		// Add initial corner
+		moveMapPoint move = rectifyInitialPoint1(x,y);
+		D += 2 * ((dy*move.x) - (dx*move.y));
+		x += move.x;
+		y += move.y;
+
+		if (move.printCorner) {
+			if (D <= 0) {
+				writeTile3(x,y);
+				D += 2 * ((dy*2) - (dx*-1));
+				x += 2;
+				y -= -1;
+			} else {
+				writeTile3(x-2,y-1);
+			}
+		}
+
+		while (x < x1) {
+			if (D <= 0) {
+				writeTile2(x,y);
+				xSteps = 2;
+				ySteps = -1;
+				lastStepDown = false;
+			} else {
+				writeTile1(x,y-1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepDown = true;
+			}
+			D += 2 * ((dy*xSteps) - (dx*ySteps));
+			x += xSteps;
+			y -= ySteps;
+		}
+
+	} else { // always -y, conditionally +x
+		dy = abs(dy);
+		double D = 2 * dx - dy;
+
+		// Add initial corner
+		moveMapPoint move = rectifyInitialPoint1(x,y);
+		D += 2 * ((dx*move.y) - (dy*move.x));
+		x += move.x;
+		y += move.y;
+
+		if (move.printCorner) {
+			if (D > 0) {
+				writeTile3(x,y);
+				D += 2 * ((dx*1) - (dy*2));
+				x += 2;
+				y -= 1;
+			}
+		} else { 
+			if (!isTileXY(2, x, y)) {
+				D += 2 * ((dx*-1));
+				y += -1;
+			}
+			if (move.toDown && D <= 0) {
+				writeTile1(x,y-1);
+				D += 2 * ((dx*1) - (dy*2));
+				x += 2;
+				y -= 1;
+			}
+		}
+
+		while (y > y1) {
+			if (D <= 0) {
+				if (isTileXY(3, x-2, y-1)) writeTile4(x,y);
+				else if (isTileXY(1, x-2, y-1)) writeTile5(x,y);
+				else writeTile3(x-2,y-2);
+				xSteps = 0;
+				ySteps = 2;
+				lastStepDown = true;
+			} else {
+				writeTile1(x,y-1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepDown = false;
+			}
+			D += 2 * ((dx*ySteps) - (dy*xSteps));
+			x += xSteps;
+			y -= ySteps;
+		}
+
+		// end line
+		if (lastStepDown) writeTile1(x,y-1);
+	}
+
 }
