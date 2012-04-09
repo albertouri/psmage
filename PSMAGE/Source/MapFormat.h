@@ -30,6 +30,14 @@ protected:
 	std::vector<char> mapBuffer;
 	std::vector<short> normalTerrain1;
 	std::vector<short> highTerrain1;
+	std::vector<short> tile1;
+	std::vector<short> tile2;
+	std::vector<short> tile3;
+	std::vector<short> tile4;
+	std::vector<short> tile5;
+	std::vector<short> tile6;
+	std::vector<short> tile7;
+	std::vector<short> tile8;
 	
 private:
 	struct moveMapPoint {
@@ -57,7 +65,7 @@ private:
 	moveMapPoint rectifyInitialPoint2(int x, int y);
 
 	void editMapTile(int x, int y, short tileId);
-	short readMapTile(int x, int y);
+	short getMapTile(int x, int y);
 	void writeTile1(int x, int y);
 	void writeTile2(int x, int y);
 	void writeTile3(int x, int y);

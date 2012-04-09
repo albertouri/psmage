@@ -12,6 +12,38 @@ MapFormat::MapFormat(short mapWidth, short mapHeight)
 	static const short const2[] = {64,65,66,67,68,69,70,71,72,74,75,76,77,78,80,81,82,83,84,85,86,87,88,90,91,92,93,94};
 	std::vector<short> vector2(const2, const2+sizeOfArray(const2));
 	highTerrain1.insert( highTerrain1.end(), vector2.begin(), vector2.end() );
+
+	static const short const3[] = {0x0341,0x0351,0x0361,0x0371,0x0381,0x0391};
+	std::vector<short> vector3(const3, const3+sizeOfArray(const3));
+	tile1.insert( tile1.end(), vector3.begin(), vector3.end() );
+
+	static const short const4[] = {0x03a0,0x03b0,0x03c0,0x03d0,0x03e0,0x03f0};
+	std::vector<short> vector4(const4, const4+sizeOfArray(const4));
+	tile2.insert( tile2.end(), vector4.begin(), vector4.end() );
+
+	static const short const5[] = {0x0410,0x0423,0x0433,0x0443,0x0453};
+	std::vector<short> vector5(const5, const5+sizeOfArray(const5));
+	tile3.insert( tile3.end(), vector5.begin(), vector5.end() );
+
+	static const short const6[] = {0x04c1,0x04d1,0x0613,0x04e1,0x04f1};
+	std::vector<short> vector6(const6, const6+sizeOfArray(const6));
+	tile4.insert( tile4.end(), vector6.begin(), vector6.end() );
+
+	static const short const7[] = {0x04c0,0x04d0,0x05d1,0x04e2,0x04f2};
+	std::vector<short> vector7(const7, const7+sizeOfArray(const7));
+	tile5.insert( tile5.end(), vector7.begin(), vector7.end() );
+
+	static const short const8[] = {0x0462,0x0472,0x0482,0x0492,0x04a2,0x04b2};
+	std::vector<short> vector8(const8, const8+sizeOfArray(const8));
+	tile6.insert( tile6.end(), vector8.begin(), vector8.end() );
+
+	static const short const9[] = {0x0502,0x0512,0x0521,0x0531,0x0623,0x0633};
+	std::vector<short> vector9(const9, const9+sizeOfArray(const9));
+	tile7.insert( tile7.end(), vector9.begin(), vector9.end() );
+
+	static const short const10[] = {0x03a3,0x03b3,0x0500,0x0510,0x03c3,0x03d3,0x0522,0x0532,0x05e3,0x05f3};
+	std::vector<short> vector10(const10, const10+sizeOfArray(const10));
+	tile8.insert( tile8.end(), vector10.begin(), vector10.end() );
 }
 
 MapFormat::~MapFormat()
@@ -980,10 +1012,40 @@ void MapFormat::importMap(short** mapInfo)
 			}
 		}
 	}
+
+	editMapTile(50, 50, (short)0x0351);
+	short tileId = getMapTile(50, 50);
+	//writeTile1(50, 50);
+	//writeTile2(52, 50);
+	drawLineDownToHigh(5, 30, 50, 50);
+}
+
+void MapFormat::editMapTile(int x, int y, short tileId)
+{
+	if (x > width || y > height) return;
+	y = height - y; // adjust origin to left-down corner
+	const char *tile;
+	tile = reinterpret_cast<const char*>( &tileId );
+	mapBuffer[(x*2)+(y*2*width)]	= tile[0];
+	mapBuffer[(x*2)+(y*2*width)+1]	= tile[1];
+}
+
+short MapFormat::getMapTile(int x, int y)
+{
+	if (x > width || y > height) return 0;
+	y = height - y; // adjust origin to left-down corner
+	char tile[2];
+	tile[0] = mapBuffer[(x*2)+(y*2*width)];
+	tile[1] = mapBuffer[(x*2)+(y*2*width)+1];
+	short result = (short(tile[1]) << 8) + short(tile[0]);
+	return result;
 }
 
 void MapFormat::writeTile1(int x, int y)
 {
+	editMapTile(x, y  , (short)0x0341); editMapTile(x+1, y  , (short)0x0351);
+	editMapTile(x, y-1, (short)0x0361); editMapTile(x+1, y-1, (short)0x0371);
+	editMapTile(x, y-2, (short)0x0381); editMapTile(x+1, y-2, (short)0x0391);
 	//buffer[y  , x], buffer[y  , x+1] = 1, 1
 	//buffer[y-1, x], buffer[y-1, x+1] = 1, 1
 	//buffer[y-2, x], buffer[y-2, x+1] = 1, 1
@@ -991,6 +1053,9 @@ void MapFormat::writeTile1(int x, int y)
 
 void MapFormat::writeTile2(int x, int y)
 {
+	editMapTile(x, y  , (short)0x03a0); editMapTile(x+1, y  , (short)0x03b0);
+	editMapTile(x, y-1, (short)0x03c0); editMapTile(x+1, y-1, (short)0x03d0);
+	editMapTile(x, y-2, (short)0x03e0); editMapTile(x+1, y-2, (short)0x03f0);
 	//buffer[y  , x], buffer[y  , x+1] = 2, 2
 	//buffer[y-1, x], buffer[y-1, x+1] = 2, 2
 	//buffer[y-2, x], buffer[y-2, x+1] = 2, 2
@@ -998,6 +1063,9 @@ void MapFormat::writeTile2(int x, int y)
 
 void MapFormat::writeTile3(int x, int y)
 {
+	/*editMapTile(x, y+1, (short)0x03a0);*/ editMapTile(x+1, y+1, (short)0x0410);
+	editMapTile(x, y  , (short)0x0423); editMapTile(x+1, y  , (short)0x0433);
+	editMapTile(x, y-1, (short)0x0443); editMapTile(x+1, y-1, (short)0x0453);
 	//buffer[y+1, x], buffer[y+1, x+1] = 3, 3
 	//buffer[y  , x], buffer[y  , x+1] = 3, 3
 	//buffer[y-1, x], buffer[y-1, x+1] = 3, 3
@@ -1005,6 +1073,10 @@ void MapFormat::writeTile3(int x, int y)
 
 void MapFormat::writeTile4(int x, int y)
 {
+																				editMapTile(x, y  , (short)0x04c1); editMapTile(x+1, y  , (short)0x04d1);
+										  editMapTile(x-1, y-1, (short)0x0613);	editMapTile(x, y-1, (short)0x04e1); editMapTile(x+1, y-1, (short)0x04f1);
+	editMapTile(x-2, y-2, (short)0x0423); editMapTile(x-1, y-2, (short)0x0433);
+	editMapTile(x-2, y-3, (short)0x0443); editMapTile(x-1, y-3, (short)0x0453);
 	//buffer[y  , x  ], buffer[y  , x+1] = 4, 4
 	//buffer[y-1, x-1], buffer[y-1, x  ], buffer[y-1, x+1] = 4, 4, 4
 	//buffer[y-2, x-2], buffer[y-2, x-1] = 3, 3
@@ -1013,6 +1085,10 @@ void MapFormat::writeTile4(int x, int y)
 
 void MapFormat::writeTile5(int x, int y)
 {
+																				editMapTile(x, y  , (short)0x04c0); editMapTile(x+1, y  , (short)0x04d0);
+										  editMapTile(x-1, y-1, (short)0x05d1);	editMapTile(x, y-1, (short)0x04e2); editMapTile(x+1, y-1, (short)0x04f2);
+	editMapTile(x-2, y-2, (short)0x042a); editMapTile(x-1, y-2, (short)0x043a);
+	editMapTile(x-2, y-3, (short)0x044a); editMapTile(x-1, y-3, (short)0x045a);
 	//buffer[y  , x  ], buffer[y  , x+1] = 5, 5
 	//buffer[y-1, x-1], buffer[y-1, x  ], buffer[y-1, x+1] = 5, 5, 5
 	//buffer[y-2, x-2], buffer[y-2, x-1] = 3, 3
@@ -1021,6 +1097,9 @@ void MapFormat::writeTile5(int x, int y)
 
 void MapFormat::writeTile6(int x, int y)
 {
+	editMapTile(x, y  , (short)0x0462); editMapTile(x+1, y  , (short)0x0472);
+	editMapTile(x, y-1, (short)0x0482); editMapTile(x+1, y-1, (short)0x0492);
+	editMapTile(x, y-2, (short)0x04a2); editMapTile(x+1, y-2, (short)0x04b2);
 	//buffer[y  , x], buffer[y  , x+1] = 6, 6
 	//buffer[y-1, x], buffer[y-1, x+1] = 6, 6
 	//buffer[y-2, x], buffer[y-2, x+1] = 6, 6
@@ -1028,15 +1107,19 @@ void MapFormat::writeTile6(int x, int y)
 
 void MapFormat::writeTile7(int x, int y)
 {
-	//buffer[y  , x], buffer[y  , x+1] = 6, 6
-	//buffer[y-1, x], buffer[y-1, x+1] = 6, 6
-	//buffer[y-2, x  ], buffer[y-2, x+1] = 7, 7
-	//buffer[y-2, x-2], buffer[y-2, x-1] = 7, 7
-	//buffer[y-1, x-2], buffer[y-1, x-1] = 7, 7
+																				editMapTile(x, y  , (short)0x0462); editMapTile(x+1, y  , (short)0x0472);
+	editMapTile(x-2, y-1, (short)0x0502); editMapTile(x-1, y-1, (short)0x0512); editMapTile(x, y-1, (short)0x0482); editMapTile(x+1, y-1, (short)0x0492);
+	editMapTile(x-2, y-2, (short)0x0521); editMapTile(x-1, y-2, (short)0x0531); editMapTile(x, y-2, (short)0x0623); editMapTile(x+1, y-2, (short)0x0633);
+												//buffer[y  , x], buffer[y  , x+1] = 6, 6
+	//buffer[y-1, x-2], buffer[y-1, x-1] = 7, 7 //buffer[y-1, x], buffer[y-1, x+1] = 6, 6
+	//buffer[y-2, x-2], buffer[y-2, x-1] = 7, 7 //buffer[y-2, x  ], buffer[y-2, x+1] = 7, 7
 }
 
 void MapFormat::writeTile8(int x, int y)
 {
+																				editMapTile(x, y  , (short)0x03a3); editMapTile(x+1, y  , (short)0x03b3);
+	editMapTile(x-2, y-1, (short)0x0500); editMapTile(x-1, y-1, (short)0x0510); editMapTile(x, y-1, (short)0x03c3); editMapTile(x+1, y-1, (short)0x03d3);
+	editMapTile(x-2, y-2, (short)0x0522); editMapTile(x-1, y-2, (short)0x0532); editMapTile(x, y-2, (short)0x05e3); editMapTile(x+1, y-2, (short)0x05f3);
 	//buffer[y  , x], buffer[y  , x+1] = 8, 8
 	//buffer[y-1, x-2], buffer[y-1, x-1], buffer[y-1, x], buffer[y-1, x+1] = 8, 8, 8, 8
 	//buffer[y-2, x-2], buffer[y-2, x-1], buffer[y-2, x], buffer[y-2, x+1] = 8, 8, 8, 8
@@ -1044,6 +1127,8 @@ void MapFormat::writeTile8(int x, int y)
 
 bool MapFormat::isTileXY(short tileId, int x, int y)
 {
+	short tileStored = getMapTile(x, y);
+	//std::find(vector.begin(), vector.end(), item)!=vector.end()
 	return false;
 }
 
