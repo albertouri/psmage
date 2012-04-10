@@ -1013,11 +1013,12 @@ void MapFormat::importMap(short** mapInfo)
 		}
 	}
 
-	editMapTile(50, 50, (short)0x0351);
-	short tileId = getMapTile(50, 50);
+	//editMapTile(50, 50, (short)0x0351);
+	//short tileId = getMapTile(50, 50);
 	//writeTile1(50, 50);
 	//writeTile2(52, 50);
-	drawLineDownToHigh(5, 30, 50, 50);
+	drawLineDownToHigh(5, 30, 20, 5);
+	drawLineDownToHigh(25, 30, 40, 60);
 }
 
 void MapFormat::editMapTile(int x, int y, short tileId)
@@ -1128,8 +1129,17 @@ void MapFormat::writeTile8(int x, int y)
 bool MapFormat::isTileXY(short tileId, int x, int y)
 {
 	short tileStored = getMapTile(x, y);
-	//std::find(vector.begin(), vector.end(), item)!=vector.end()
-	return false;
+	switch (tileId) {
+		case 1: return std::find(tile1.begin(), tile1.end(), tileStored)!=tile1.end();
+		case 2: return std::find(tile2.begin(), tile2.end(), tileStored)!=tile2.end();
+		case 3: return std::find(tile3.begin(), tile3.end(), tileStored)!=tile3.end();
+		case 4: return std::find(tile4.begin(), tile4.end(), tileStored)!=tile4.end();
+		case 5: return std::find(tile5.begin(), tile5.end(), tileStored)!=tile5.end();
+		case 6: return std::find(tile6.begin(), tile6.end(), tileStored)!=tile6.end();
+		case 7: return std::find(tile7.begin(), tile7.end(), tileStored)!=tile7.end();
+		case 8: return std::find(tile8.begin(), tile8.end(), tileStored)!=tile8.end();
+		default: return false;
+	}
 }
 
 MapFormat::moveMapPoint MapFormat::rectifyInitialPoint1(int x, int y)
@@ -1137,7 +1147,7 @@ MapFormat::moveMapPoint MapFormat::rectifyInitialPoint1(int x, int y)
 	moveMapPoint move;
 	move.x = 0;
 	move.y = 0;
-	move.printCorner = false;
+	move.printCorner = true;
 	move.toDown = false;
 
 	return move;
@@ -1148,7 +1158,7 @@ MapFormat::moveMapPoint MapFormat::rectifyInitialPoint2(int x, int y)
 	moveMapPoint move;
 	move.x = 0;
 	move.y = 0;
-	move.printCorner = false;
+	move.printCorner = true;
 	move.toDown = false;
 
 	return move;
@@ -1317,10 +1327,11 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		if (move.printCorner) {
 			if (D > 0) {
-				writeTile3(x,y);
+				writeTile3(x,y-1);
 				D += 2 * ((dx*1) - (dy*2));
 				x += 2;
 				y -= 1;
+				//editMapTile(x, y, (short)normalTerrain1[0]);
 			}
 		} else { 
 			if (!isTileXY(2, x, y)) {
@@ -1337,14 +1348,14 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		while (y > y1) {
 			if (D <= 0) {
-				if (isTileXY(3, x-2, y-1)) writeTile4(x,y);
-				else if (isTileXY(1, x-2, y-1)) writeTile5(x,y);
+				if (isTileXY(3, x-1, y)) writeTile4(x,y);
+				else if (isTileXY(1, x-1, y)) writeTile5(x,y);
 				else writeTile3(x-2,y-2);
 				xSteps = 0;
 				ySteps = 2;
 				lastStepDown = true;
 			} else {
-				writeTile1(x,y-1);
+				writeTile1(x,y);
 				xSteps = 2;
 				ySteps = 1;
 				lastStepDown = false;
