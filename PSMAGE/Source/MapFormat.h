@@ -66,6 +66,8 @@ private:
 
 	void editMapTile(int x, int y, short tileId);
 	short getMapTile(int x, int y);
+	void writeTileNormal(int x, int y);
+	void writeTileHigh(int x, int y);
 	void writeTile1(int x, int y);
 	void writeTile2(int x, int y);
 	void writeTile3(int x, int y);
@@ -74,7 +76,7 @@ private:
 	void writeTile6(int x, int y);
 	void writeTile7(int x, int y);
 	void writeTile8(int x, int y);
-	bool isTileXY(short tileId, int x, int y);
+	bool isTileIdAtXY(short tileId, int x, int y);
 
 	short width;
 	short height;
