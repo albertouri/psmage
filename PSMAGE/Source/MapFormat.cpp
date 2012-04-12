@@ -1017,14 +1017,14 @@ void MapFormat::importMap(short** mapInfo)
 	//short tileId = getMapTile(50, 50);
 	//writeTile1(50, 50);
 	//writeTile2(52, 50);
-	drawLineDownToHigh(5, 30, 20, 5);
-	drawLineDownToHigh(20, 5, 40, 60);
+	//drawLineDownToHigh(5, 30, 20, 5);
+	//drawLineDownToHigh(20, 5, 40, 60);
 }
 
 void MapFormat::editMapTile(int x, int y, short tileId)
 {
-	if (x > width || y > height) return;
 	y = height - y; // adjust origin to left-down corner
+	if (x >= width || y >= height) return;
 	const char *tile;
 	tile = reinterpret_cast<const char*>( &tileId );
 	mapBuffer[(x*2)+(y*2*width)]	= tile[0];
@@ -1033,9 +1033,9 @@ void MapFormat::editMapTile(int x, int y, short tileId)
 
 short MapFormat::getMapTile(int x, int y)
 {
-	if (x > width || y > height) return 0;
 	y = height - y; // adjust origin to left-down corner
-	char tile[2];
+	if (x >= width || y >= height) return 0;
+	unsigned char tile[2];
 	tile[0] = mapBuffer[(x*2)+(y*2*width)];
 	tile[1] = mapBuffer[(x*2)+(y*2*width)+1];
 	short result = (short(tile[1]) << 8) + short(tile[0]);
@@ -1059,9 +1059,9 @@ void MapFormat::writeTile1(int x, int y)
 	editMapTile(x, y  , (short)0x0341); editMapTile(x+1, y  , (short)0x0351);
 	editMapTile(x, y-1, (short)0x0361); editMapTile(x+1, y-1, (short)0x0371);
 	editMapTile(x, y-2, (short)0x0381); editMapTile(x+1, y-2, (short)0x0391);
-	//buffer[y  , x], buffer[y  , x+1] = 1, 1
-	//buffer[y-1, x], buffer[y-1, x+1] = 1, 1
-	//buffer[y-2, x], buffer[y-2, x+1] = 1, 1
+	// sanitize check  // TODO it doesn't work
+	if (isTileIdAtXY(21, x, y+1)) writeTileHigh(x, y+1);
+	if (isTileIdAtXY(21, x+1, y+1)) writeTileHigh(x+1, y+1);
 }
 
 void MapFormat::writeTile2(int x, int y)
@@ -1069,19 +1069,16 @@ void MapFormat::writeTile2(int x, int y)
 	editMapTile(x, y  , (short)0x03a0); editMapTile(x+1, y  , (short)0x03b0);
 	editMapTile(x, y-1, (short)0x03c0); editMapTile(x+1, y-1, (short)0x03d0);
 	editMapTile(x, y-2, (short)0x03e0); editMapTile(x+1, y-2, (short)0x03f0);
-	//buffer[y  , x], buffer[y  , x+1] = 2, 2
-	//buffer[y-1, x], buffer[y-1, x+1] = 2, 2
-	//buffer[y-2, x], buffer[y-2, x+1] = 2, 2
+	// sanitize check  // TODO it doesn't work
+	if (isTileIdAtXY(22, x, y+1)) writeTileNormal(x, y+1);
+	if (isTileIdAtXY(22, x+1, y+1)) writeTileNormal(x+1, y+1);
 }
 
 void MapFormat::writeTile3(int x, int y)
 {
-	/*editMapTile(x, y+1, (short)0x03a0);*/ editMapTile(x+1, y+1, (short)0x0410);
+	writeTileNormal(x, y+1); editMapTile(x+1, y+1, (short)0x0410);
 	editMapTile(x, y  , (short)0x0423); editMapTile(x+1, y  , (short)0x0433);
 	editMapTile(x, y-1, (short)0x0443); editMapTile(x+1, y-1, (short)0x0453);
-	//buffer[y+1, x], buffer[y+1, x+1] = 3, 3
-	//buffer[y  , x], buffer[y  , x+1] = 3, 3
-	//buffer[y-1, x], buffer[y-1, x+1] = 3, 3
 }
 
 void MapFormat::writeTile4(int x, int y)
@@ -1090,10 +1087,6 @@ void MapFormat::writeTile4(int x, int y)
 										  editMapTile(x-1, y-1, (short)0x0613);	editMapTile(x, y-1, (short)0x04e1); editMapTile(x+1, y-1, (short)0x04f1);
 	editMapTile(x-2, y-2, (short)0x0423); editMapTile(x-1, y-2, (short)0x0433);
 	editMapTile(x-2, y-3, (short)0x0443); editMapTile(x-1, y-3, (short)0x0453);
-	//buffer[y  , x  ], buffer[y  , x+1] = 4, 4
-	//buffer[y-1, x-1], buffer[y-1, x  ], buffer[y-1, x+1] = 4, 4, 4
-	//buffer[y-2, x-2], buffer[y-2, x-1] = 3, 3
-	//buffer[y-3, x-2], buffer[y-3, x-1] = 3, 3
 }
 
 void MapFormat::writeTile5(int x, int y)
@@ -1102,10 +1095,6 @@ void MapFormat::writeTile5(int x, int y)
 										  editMapTile(x-1, y-1, (short)0x05d1);	editMapTile(x, y-1, (short)0x04e2); editMapTile(x+1, y-1, (short)0x04f2);
 	editMapTile(x-2, y-2, (short)0x042a); editMapTile(x-1, y-2, (short)0x043a);
 	editMapTile(x-2, y-3, (short)0x044a); editMapTile(x-1, y-3, (short)0x045a);
-	//buffer[y  , x  ], buffer[y  , x+1] = 5, 5
-	//buffer[y-1, x-1], buffer[y-1, x  ], buffer[y-1, x+1] = 5, 5, 5
-	//buffer[y-2, x-2], buffer[y-2, x-1] = 3, 3
-	//buffer[y-3, x-2], buffer[y-3, x-1] = 3, 3
 }
 
 void MapFormat::writeTile6(int x, int y)
@@ -1113,9 +1102,6 @@ void MapFormat::writeTile6(int x, int y)
 	editMapTile(x, y  , (short)0x0462); editMapTile(x+1, y  , (short)0x0472);
 	editMapTile(x, y-1, (short)0x0482); editMapTile(x+1, y-1, (short)0x0492);
 	editMapTile(x, y-2, (short)0x04a2); editMapTile(x+1, y-2, (short)0x04b2);
-	//buffer[y  , x], buffer[y  , x+1] = 6, 6
-	//buffer[y-1, x], buffer[y-1, x+1] = 6, 6
-	//buffer[y-2, x], buffer[y-2, x+1] = 6, 6
 }
 
 void MapFormat::writeTile7(int x, int y)
@@ -1123,9 +1109,6 @@ void MapFormat::writeTile7(int x, int y)
 																				editMapTile(x, y  , (short)0x0462); editMapTile(x+1, y  , (short)0x0472);
 	editMapTile(x-2, y-1, (short)0x0502); editMapTile(x-1, y-1, (short)0x0512); editMapTile(x, y-1, (short)0x0482); editMapTile(x+1, y-1, (short)0x0492);
 	editMapTile(x-2, y-2, (short)0x0521); editMapTile(x-1, y-2, (short)0x0531); editMapTile(x, y-2, (short)0x0623); editMapTile(x+1, y-2, (short)0x0633);
-												//buffer[y  , x], buffer[y  , x+1] = 6, 6
-	//buffer[y-1, x-2], buffer[y-1, x-1] = 7, 7 //buffer[y-1, x], buffer[y-1, x+1] = 6, 6
-	//buffer[y-2, x-2], buffer[y-2, x-1] = 7, 7 //buffer[y-2, x  ], buffer[y-2, x+1] = 7, 7
 }
 
 void MapFormat::writeTile8(int x, int y)
@@ -1133,9 +1116,6 @@ void MapFormat::writeTile8(int x, int y)
 																				editMapTile(x, y  , (short)0x03a3); editMapTile(x+1, y  , (short)0x03b3);
 	editMapTile(x-2, y-1, (short)0x0500); editMapTile(x-1, y-1, (short)0x0510); editMapTile(x, y-1, (short)0x03c3); editMapTile(x+1, y-1, (short)0x03d3);
 	editMapTile(x-2, y-2, (short)0x0522); editMapTile(x-1, y-2, (short)0x0532); editMapTile(x, y-2, (short)0x05e3); editMapTile(x+1, y-2, (short)0x05f3);
-	//buffer[y  , x], buffer[y  , x+1] = 8, 8
-	//buffer[y-1, x-2], buffer[y-1, x-1], buffer[y-1, x], buffer[y-1, x+1] = 8, 8, 8, 8
-	//buffer[y-2, x-2], buffer[y-2, x-1], buffer[y-2, x], buffer[y-2, x+1] = 8, 8, 8, 8
 }
 
 bool MapFormat::isTileIdAtXY(short tileId, int x, int y)
@@ -1144,7 +1124,8 @@ bool MapFormat::isTileIdAtXY(short tileId, int x, int y)
 	switch (tileId) {
 		case 0: return std::find(normalTerrain1.begin(), normalTerrain1.end(), tileStored)!=normalTerrain1.end() || 
 					   std::find(highTerrain1.begin(), highTerrain1.end(), tileStored)!=highTerrain1.end() ||
-					   tileStored == (short)41; // special case while debugging
+					   tileStored == (short)41 || // special case while debugging
+					   tileStored == 0; // out of map
 		case 1: return std::find(tile1.begin(), tile1.end(), tileStored)!=tile1.end();
 		case 2: return std::find(tile2.begin(), tile2.end(), tileStored)!=tile2.end();
 		case 3: return std::find(tile3.begin(), tile3.end(), tileStored)!=tile3.end();
@@ -1153,6 +1134,8 @@ bool MapFormat::isTileIdAtXY(short tileId, int x, int y)
 		case 6: return std::find(tile6.begin(), tile6.end(), tileStored)!=tile6.end();
 		case 7: return std::find(tile7.begin(), tile7.end(), tileStored)!=tile7.end();
 		case 8: return std::find(tile8.begin(), tile8.end(), tileStored)!=tile8.end();
+		case 21: return std::find(normalTerrain1.begin(), normalTerrain1.end(), tileStored)!=normalTerrain1.end();
+		case 22: return std::find(highTerrain1.begin(), highTerrain1.end(), tileStored)!=highTerrain1.end();
 		default: return false;
 	}
 }
@@ -1160,13 +1143,6 @@ bool MapFormat::isTileIdAtXY(short tileId, int x, int y)
 MapFormat::moveMapPoint MapFormat::rectifyInitialPoint1(int x, int y)
 {
 	moveMapPoint move;
-	//move.x = 0;
-	//move.y = 0;
-	//move.printCorner = true;
-	//move.toDown = false;
-
-	//return move;
-
 	int x0 = x; 
 	int y0 = y;
 
@@ -1252,12 +1228,103 @@ MapFormat::moveMapPoint MapFormat::rectifyInitialPoint1(int x, int y)
 MapFormat::moveMapPoint MapFormat::rectifyInitialPoint2(int x, int y)
 {
 	moveMapPoint move;
-	move.x = 0;
-	move.y = 0;
-	move.printCorner = true;
-	move.toDown = false;
+	int x0 = x; 
+	int y0 = y;
 
-	return move;
+	// down to down conditions
+	if (isTileIdAtXY(6, x, y) || isTileIdAtXY(6, x+1, y-1) || isTileIdAtXY(6, x+3, y-1)) {
+		if (!isTileIdAtXY(6, x, y)) {
+			y -= 1;
+			if (isTileIdAtXY(6, x+1, y)) x += 1;
+			else if (isTileIdAtXY(6, x+3, y)) x += 3;
+		}
+		short moves = 1;
+		while (moves != 0) {
+			moves = 0;
+			while (!isTileIdAtXY(0, x, y+1)) {
+				y += 1;
+				moves += 1;
+			}
+			while (!isTileIdAtXY(0, x+1, y)) {
+				x += 1;
+				moves += 1;
+			}
+		}
+		move.x = x - x0;
+		move.y = y - y0;
+		if (isTileIdAtXY(2, x-2, y-1) || isTileIdAtXY(8, x-2, y-1)) {
+			writeTileHigh(x,y); writeTileHigh(x-1,y);
+			move.x -= 1;
+		} else if (isTileIdAtXY(7, x-2, y-1)) {
+			writeTile8(x-1,y);
+			move.x += 1;
+			move.y += 1;
+		}
+		move.printCorner = false;
+		move.toDown = true;
+		return move;
+	}
+
+	// down to up conditions
+	else {
+		if (isTileIdAtXY(0, x, y)) {
+			if (!isTileIdAtXY(0, x-2, y)) x -= 2;
+			else if (!isTileIdAtXY(0, x-3, y)) x -= 3;
+			else if (!isTileIdAtXY(0, x+2, y)) x += 2;
+			else if (!isTileIdAtXY(0, x, y-2)) y -= 2;
+			else if (!isTileIdAtXY(0, x, y+2)) y += 2;
+			else {
+				move.x = 0;
+				move.y = 0;
+				move.printCorner = true;
+				move.toDown = false;
+				return move;
+			}
+		}
+		short moves = 1;
+		while (moves != 0) {
+			moves = 0;
+			while (!isTileIdAtXY(0, x, y-1)) {
+				y -= 1;
+				moves += 1;
+			}
+			while (!isTileIdAtXY(0, x+1, y)) {
+				x += 1;
+				moves += 1;
+			}
+		}
+
+		move.x = x - x0;
+		move.y = y - y0;
+		if (isTileIdAtXY(1, x, y)) {
+			move.x += 1;
+			move.y += 2;
+		} else if (isTileIdAtXY(2, x, y)) {
+			//writeTileHigh(x,y+2); writeTileHigh(x-1,y+2); // DIFERENCE FROM function1
+			move.x -= 1;
+			move.y += 2; // move.y += 1; DIFERENCE FROM function1
+		}
+		move.printCorner = false;
+		move.toDown = false;
+		return move;
+	}
+}
+
+void MapFormat::drawLineDownToHigh(vor::Edges edges, double scale)
+{
+	edges.sort(&MapFormat::sortEdgesByX);
+	for(vor::Edges::iterator i = edges.begin(); i!= edges.end(); ++i) {
+		// scale points
+		double x0 = (*i)->start->x * scale;
+		double y0 = (*i)->start->y * scale;
+		double x1 = (*i)->end->x * scale;
+		double y1 = (*i)->end->y * scale;
+		// adjust origin x,y to down-left corner
+		y0 = height - y0 + 1;
+		y1 = height - y1 + 1;
+
+		drawLineDownToHigh(int(x0), int(y0), int(x1), int(y1));
+	}
 }
 
 void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
@@ -1370,7 +1437,7 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 			writeTile6(x,y+1);
 		} else {
 			writeTile6(x-2,y+2);
-			//buffer[y-1, x-2], buffer[y-1, x-1] = 0, 0 # cuidado!!! esto es poner el tile en low
+			writeTileNormal(x-2,y-1);
 		}
 
 	} else if (slope > -0.5 && slope != 0) { // always +x, conditionally -y
@@ -1385,12 +1452,14 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		if (move.printCorner) {
 			if (D <= 0) {
-				writeTile3(x,y);
+				if (!isTileIdAtXY(22,x,y)) writeTile3(x,y);
+				else writeTile1(x,y+1);
 				D += 2 * ((dy*2) - (dx*-1));
 				x += 2;
 				y -= -1;
 			} else {
-				writeTile3(x-2,y-1);
+				if (!isTileIdAtXY(22,x-2,y-1)) writeTile3(x-2,y-1);
+				else writeTile1(x-2,y);
 			}
 		}
 
@@ -1423,11 +1492,12 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		if (move.printCorner) {
 			if (D > 0) {
-				writeTile3(x,y-1);
+				if (!isTileIdAtXY(22,x,y-1)) writeTile3(x,y-1);
+				else writeTile1(x,y);
 				D += 2 * ((dx*1) - (dy*2));
 				x += 2;
 				y -= 1;
-				//editMapTile(x, y, (short)normalTerrain1[0]);
+				writeTileNormal(x,y);
 			}
 		} else { 
 			if (!isTileIdAtXY(2, x, y)) {

@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <time.h>
+#include "Voronoi.h"
 
 
 template <typename T, std::size_t N>
@@ -20,6 +21,7 @@ public:
 	void generateFile();
 	void importMap(short** mapInfo);
 	void drawLineDownToHigh(int x0, int y0, int x1, int y1);
+	void drawLineDownToHigh(vor::Edges edges, double scale);
 protected:
 	std::string headerName;
 	int dataSize;
@@ -77,6 +79,15 @@ private:
 	void writeTile7(int x, int y);
 	void writeTile8(int x, int y);
 	bool isTileIdAtXY(short tileId, int x, int y);
+
+	bool static sortEdgesByX (const VEdge *edge1, const VEdge *edge2)
+	{
+		short minX1 = (short)edge1->start->x;
+		if (minX1 > edge1->end->x) minX1 = (short)edge1->end->x;
+		short minX2 = (short)edge2->start->x;
+		if (minX2 > edge2->end->x) minX2 = (short)edge2->end->x;
+		return (minX1<minX2); 
+	};
 
 	short width;
 	short height;

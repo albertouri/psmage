@@ -11,7 +11,6 @@
 #include <map>
 
 typedef std::vector<Region*> RegionSet;
-typedef std::map<VPoint *,Region *> PointToRegionMap;
 
 typedef int OutCode;
 
@@ -51,7 +50,6 @@ private:
 	vor::Vertices * ver;
 	vor::Edges * edg;
 	RegionSet regions;
-	PointToRegionMap pointsToRegion;
 
 	vor::Vertices x0edges; // contains tuple of elements P1 and P2 of an edge (where P1 is on x0edge)
 	vor::Vertices xMaxedges;
@@ -69,6 +67,8 @@ private:
 	vor::Edges highToDown;
 
 	void generateVoroni();
+	void generateHillEdges();
+	Region* getRegion(VPoint *location);
 	OutCode computeOutCode(VPoint *p1);
 	void clipping(VPoint *p1, VPoint *p2);
 };

@@ -39,7 +39,6 @@ void RenderArea::generateVoroni()
 		ver->push_back(seed);
 		Region *newRegion = new Region(seed);
 		regions.push_back(newRegion);
-		pointsToRegion.insert(PointToRegionMap::value_type(seed, newRegion));
 	}
 	// Generate Voronoi edges
 	edg = v->GetEdges(ver, renderMapWidth, renderMapHeight);
@@ -53,10 +52,8 @@ void RenderArea::generateVoroni()
 				((int)(*i)->start->x == renderMapWidth && (int)(*i)->end->x == renderMapWidth) ||
 				((int)(*i)->start->y == 0 && (int)(*i)->end->y == 0) ||
 				((int)(*i)->start->y == renderMapHeight && (int)(*i)->end->y == renderMapHeight)) ) {
-					PointToRegionMap::iterator found = pointsToRegion.find((*i)->left);
-					Region *region1 = found->second;
-					PointToRegionMap::iterator found2 = pointsToRegion.find((*i)->right);
-					Region *region2 = found2->second;
+					Region *region1 = getRegion((*i)->left);
+					Region *region2 = getRegion((*i)->right);
 					region1->neighbors.push_back(region2);
 					region1->borders.push_back(*i);
 					region2->neighbors.push_back(region1);
@@ -271,67 +268,73 @@ void RenderArea::generateElevations()
 	int hillRegions = 0;
 	while(hillRegions <= totalHills) {
 		int regionID = int(regions.size() * (double)rand()/(double)RAND_MAX);
-		//if ( !(regions[regionID]->minXborderMap && regions[regionID]->minYborderMap) ||
-		//	!(regions[regionID]->maxXborderMap && regions[regionID]->maxYborderMap) ) {
-			regions[regionID]->elevation = 2;
-			hillRegions++;
-		//}
+		regions[regionID]->elevation = 2;
+		hillRegions++;
 	}
 
+	generateHillEdges();
+
+	update();
+}
+
+Region* RenderArea::getRegion(VPoint *location)
+{
+	if (location == 0) return 0;
+	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
+		if ((*i)->seed->x == location->x && (*i)->seed->y == location->y)
+			return (*i);
+	}
+	return 0;
+}
+
+void RenderArea::generateHillEdges()
+{
 	downToHigh.clear();
 	highToDown.clear();
-	// Generate hill up edges
+
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
 		if ((*i)->elevation == 2) { // Iterate over edges of high regions
 			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-				// ignoring map border edges
-				if (!(((int)(*j)->start->x == 0 && (int)(*j)->end->x == 0) ||
-					((int)(*j)->start->x == renderMapWidth && (int)(*j)->end->x == renderMapWidth) ||
-					((int)(*j)->start->y == 0 && (int)(*j)->end->y == 0) ||
-					((int)(*j)->start->y == renderMapHeight && (int)(*j)->end->y == renderMapHeight)) ) {
-						PointToRegionMap::iterator left = pointsToRegion.find((*j)->left);
-						PointToRegionMap::iterator right = pointsToRegion.find((*j)->right);
-						// ignoring regions with same elevation
-						if (left->second->elevation == right->second->elevation) continue;
-						Region *downRegion = left->second;
-						if (left->second == *i) downRegion = right->second;
-						// calculate slope
-						VPoint *start = (*j)->start;
-						VPoint *end = (*j)->end;
-						if (start->x > end->x) {
-							VPoint *tmp = start;
-							start = end;
-							end = tmp;
-						}
-						double dx = end->x - start->x;
-						double dy = end->y - start->y;
-						double slope = 0;
-						if (dx!=0) slope = dy / dx;
+				Region *leftRegion = getRegion((*j)->left);
+				Region *rightRegion = getRegion((*j)->right);
+				if (leftRegion != 0 && rightRegion != 0 && leftRegion->elevation !=  rightRegion->elevation ) {
+					Region *downRegion = leftRegion;
+					if (leftRegion->elevation == 2) downRegion = rightRegion;
+					// calculate slope
+					VPoint *start = (*j)->start;
+					VPoint *end = (*j)->end;
+					if (start->x > end->x) {
+						VPoint *tmp = start;
+						start = end;
+						end = tmp;
+					}
+					double dx = end->x - start->x;
+					double dy = end->y - start->y;
+					double slope = 0;
+					if (dx!=0) slope = dy / dx;
 
-						double distanceToHigh = sqrt(pow((*i)->seed->x - start->x, 2) + pow((*i)->seed->y - end->y, 2));
-						double distanceToDown = sqrt(pow(downRegion->seed->x - start->x, 2) + pow(downRegion->seed->y - end->y, 2));
+					double distanceToHigh = sqrt(pow((*i)->seed->x - start->x, 2) + pow((*i)->seed->y - end->y, 2));
+					double distanceToDown = sqrt(pow(downRegion->seed->x - start->x, 2) + pow(downRegion->seed->y - end->y, 2));
 
-						// check direction of the hill
-						if (slope >= 0) {
-							if (distanceToHigh < distanceToDown) {
-								highToDown.push_back(*j);
-							} else {
-								downToHigh.push_back(*j);
-							}
+					// check direction of the hill
+					if (slope > 0) {
+						if (distanceToHigh < distanceToDown) {
+							highToDown.push_back(*j);
 						} else {
-							if (distanceToHigh < distanceToDown) {
-								downToHigh.push_front(*j);
-							} else {
-								highToDown.push_front(*j);
-							}
+							downToHigh.push_back(*j);
 						}
-
+					} else {
+						if (distanceToHigh < distanceToDown) {
+							downToHigh.push_front(*j);
+						} else {
+							highToDown.push_front(*j);
+						}
+					}
 				}
+
 			}
 		}
 	}
-
-	update();
 }
 
 void RenderArea::mirroringMap()
@@ -339,53 +342,64 @@ void RenderArea::mirroringMap()
 	if (!mapMirrored) {
 		mapMirrored = TRUE;
 
-		// Mirroring Y axis
+		// --- Mirroring Y axis -----------------------
 		RegionSet yRegions;
 		// hard copy 
 		for (RegionSet::iterator i=regions.begin();i!=regions.end();++i)  {
 			Region *newRegion = new Region(**i);
 			newRegion->seed = new VPoint(*(*i)->seed);
+			newRegion->seed->y = (renderMapHeight*2)-newRegion->seed->y;
 			vor::Edges::iterator o = (*i)->borders.begin();
 			for(vor::Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
 				(*j) = new VEdge(**o);
 				(*j)->start = new VPoint(*(*o)->start);
 				(*j)->end = new VPoint(*(*o)->end);
-			}
-			yRegions.push_back(newRegion);
-		}
-		for(RegionSet::iterator i = yRegions.begin(); i!= yRegions.end(); ++i) {
-			(*i)->seed->y = (renderMapHeight*2)-(*i)->seed->y;
-			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
 				(*j)->start->y = (renderMapHeight*2)-(*j)->start->y;
 				(*j)->end->y = (renderMapHeight*2)-(*j)->end->y;
+				if ((*j)->left != 0 ) {
+					(*j)->left = new VPoint(*(*o)->left);
+					(*j)->left->y = (renderMapHeight*2)-(*j)->left->y;
+				}
+				if ((*j)->right != 0 ) {
+					(*j)->right = new VPoint(*(*o)->right);
+					(*j)->right->y = (renderMapHeight*2)-(*j)->right->y;
+				}
 			}
+			yRegions.push_back(newRegion);
 		}
 		// concatenate vectors
 		regions.insert( regions.end(), yRegions.begin(), yRegions.end() );
 
-		// Mirroring X axis
+		// --- Mirroring X axis -----------------------
 		RegionSet xRegions;
 		// hard copy 
 		for (RegionSet::iterator i=regions.begin();i!=regions.end();++i)  {
 			Region *newRegion = new Region(**i);
 			newRegion->seed = new VPoint(*(*i)->seed);
+			newRegion->seed->x = (renderMapWidth*2)-newRegion->seed->x;
 			vor::Edges::iterator o = (*i)->borders.begin();
 			for(vor::Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
 				(*j) = new VEdge(**o);
 				(*j)->start = new VPoint(*(*o)->start);
 				(*j)->end = new VPoint(*(*o)->end);
+				(*j)->start->x = (renderMapWidth*2)-(*j)->start->x;
+				(*j)->end->x = (renderMapWidth*2)-(*j)->end->x;
+				if ((*j)->left != 0 ) {
+					(*j)->left = new VPoint(*(*o)->left);
+					(*j)->left->x = (renderMapWidth*2)-(*j)->left->x;
+				}
+				if ((*j)->right != 0 ) {
+					(*j)->right = new VPoint(*(*o)->right);
+					(*j)->right->x = (renderMapWidth*2)-(*j)->right->x;
+				}
 			}
 			xRegions.push_back(newRegion);
 		}
-		for(RegionSet::iterator i = xRegions.begin(); i!= xRegions.end(); ++i) {
-			(*i)->seed->x = (renderMapWidth*2)-(*i)->seed->x;
-			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
-				(*j)->start->x = (renderMapWidth*2)-(*j)->start->x;
-				(*j)->end->x = (renderMapWidth*2)-(*j)->end->x;
-			}
-		}
 		// concatenate vectors
 		regions.insert( regions.end(), xRegions.begin(), xRegions.end() );
+
+		// Generate hill edges
+		generateHillEdges();
 
 		update();
 	}
@@ -574,6 +588,8 @@ void RenderArea::generateTXT(int size)
 
 	MapFormat mapBuffer(size, size);
 	mapBuffer.importMap(mapInfo);
+	// draw hill lines
+	mapBuffer.drawLineDownToHigh(downToHigh, ((double)size/(double)2)/(double)renderMapWidth);
 	mapBuffer.generateFile();
 }
 
@@ -587,7 +603,7 @@ OutCode RenderArea::computeOutCode(VPoint *p1)
 {
 	OutCode code;
 
-	code = INSIDE;          // initialised as being inside of clip window
+	code = INSIDE;          // initialized as being inside of clip window
 
 	if (p1->x < 0)           // to the left of clip window
 		code |= LEFT;
