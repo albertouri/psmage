@@ -7,10 +7,6 @@
 #include "MapFormat.h"
 
 
-#include <fstream>
-std::ofstream fileLog("log.txt");
-#define LOG(Message) fileLog << Message << std::endl
-
 RenderArea::RenderArea(QWidget *parent)
 :	QWidget(parent)
 {

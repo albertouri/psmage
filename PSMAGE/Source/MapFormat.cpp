@@ -1,4 +1,5 @@
 #include "MapFormat.h"
+#include <cmath>
 
 
 MapFormat::MapFormat(short mapWidth, short mapHeight)
@@ -1021,10 +1022,15 @@ void MapFormat::importMap(short** mapInfo)
 	//drawLineDownToHigh(20, 5, 40, 60);
 }
 
+double MapFormat::round(double d)
+{
+	return floor(d + 0.5);
+}
+
 void MapFormat::editMapTile(int x, int y, short tileId)
 {
 	y = height - y; // adjust origin to left-down corner
-	if (x >= width || y >= height) return;
+	if (x >= width || y >= height || x < 0 || y < 0) return;
 	const char *tile;
 	tile = reinterpret_cast<const char*>( &tileId );
 	mapBuffer[(x*2)+(y*2*width)]	= tile[0];
@@ -1034,7 +1040,7 @@ void MapFormat::editMapTile(int x, int y, short tileId)
 short MapFormat::getMapTile(int x, int y)
 {
 	y = height - y; // adjust origin to left-down corner
-	if (x >= width || y >= height) return 0;
+	if (x >= width || y >= height || x < 0 || y < 0) return 0;
 	unsigned char tile[2];
 	tile[0] = mapBuffer[(x*2)+(y*2*width)];
 	tile[1] = mapBuffer[(x*2)+(y*2*width)+1];
@@ -1060,8 +1066,8 @@ void MapFormat::writeTile1(int x, int y)
 	editMapTile(x, y-1, (short)0x0361); editMapTile(x+1, y-1, (short)0x0371);
 	editMapTile(x, y-2, (short)0x0381); editMapTile(x+1, y-2, (short)0x0391);
 	// sanitize check  // TODO it doesn't work
-	if (isTileIdAtXY(21, x, y+1)) writeTileHigh(x, y+1);
-	if (isTileIdAtXY(21, x+1, y+1)) writeTileHigh(x+1, y+1);
+	if (isTileIdAtXY(21, x, y+1)) editMapTile(x, y+1, (short)41);// writeTileHigh(x, y+1);
+	if (isTileIdAtXY(21, x+1, y+1)) editMapTile(x+1, y+1, (short)41); //writeTileHigh(x+1, y+1);
 }
 
 void MapFormat::writeTile2(int x, int y)
@@ -1070,8 +1076,8 @@ void MapFormat::writeTile2(int x, int y)
 	editMapTile(x, y-1, (short)0x03c0); editMapTile(x+1, y-1, (short)0x03d0);
 	editMapTile(x, y-2, (short)0x03e0); editMapTile(x+1, y-2, (short)0x03f0);
 	// sanitize check  // TODO it doesn't work
-	if (isTileIdAtXY(22, x, y+1)) writeTileNormal(x, y+1);
-	if (isTileIdAtXY(22, x+1, y+1)) writeTileNormal(x+1, y+1);
+	if (isTileIdAtXY(22, x, y+1)) editMapTile(x, y+1, (short)41); //writeTileNormal(x, y+1);
+	if (isTileIdAtXY(22, x+1, y+1)) editMapTile(x+1, y+1, (short)41); //writeTileNormal(x+1, y+1);
 }
 
 void MapFormat::writeTile3(int x, int y)
@@ -1323,7 +1329,8 @@ void MapFormat::drawLineDownToHigh(vor::Edges edges, double scale)
 		y0 = height - y0 + 1;
 		y1 = height - y1 + 1;
 
-		drawLineDownToHigh(int(x0), int(y0), int(x1), int(y1));
+		drawLineDownToHigh(int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1)));
+		LOG("[ " << (int)round(x0) << ", " << (int)round(y0) << ", " << (int)round(x1) << ", " << (int)round(y1) << "]");
 	}
 }
 

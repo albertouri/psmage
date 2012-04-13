@@ -1,3 +1,4 @@
+#pragma once
 #ifndef Voronoi_h
 #define Voronoi_h
 
@@ -11,6 +12,10 @@
 #include "VEvent.h"
 #include <functional>
 
+#include <fstream>
+//std::ofstream fileLog("log.txt");
+extern std::ofstream fileLog;
+#define LOG(Message) fileLog << Message << std::endl
 
 namespace vor
 {

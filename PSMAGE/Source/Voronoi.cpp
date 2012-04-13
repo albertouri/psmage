@@ -5,6 +5,8 @@
 #include <set>
 #include <math.h>
 
+std::ofstream fileLog("log.txt");
+
 using namespace vor;
 
 Voronoi::Voronoi()
