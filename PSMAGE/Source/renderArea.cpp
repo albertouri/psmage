@@ -300,9 +300,7 @@ void RenderArea::generateHillEdges()
 					VPoint *start = (*j)->start;
 					VPoint *end = (*j)->end;
 					if (start->x > end->x) {
-						VPoint *tmp = start;
-						start = end;
-						end = tmp;
+						std::swap(start, end);
 					}
 					double dx = end->x - start->x;
 					double dy = end->y - start->y;
@@ -320,6 +318,9 @@ void RenderArea::generateHillEdges()
 							downToHigh.push_back(*j);
 						}
 					} else {
+						if (round(dx) == 0 && start->y < end->y && downRegion == rightRegion) {
+							std::swap((*j)->start,(*j)->end);
+						}
 						if (distanceToHigh < distanceToDown) {
 							downToHigh.push_front(*j);
 						} else {

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <time.h>
 #include "Voronoi.h"
+#include "utils.h"
 
 
 template <typename T, std::size_t N>
@@ -63,7 +64,7 @@ private:
 
 	void writeHeader(std::string name, int size);
 
-	double round(double d);
+	//double round(double d);
 
 	moveMapPoint rectifyInitialPoint1(int x, int y);
 	moveMapPoint rectifyInitialPoint2(int x, int y);

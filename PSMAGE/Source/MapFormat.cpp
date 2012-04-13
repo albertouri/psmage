@@ -1,5 +1,4 @@
 #include "MapFormat.h"
-#include <cmath>
 
 
 MapFormat::MapFormat(short mapWidth, short mapHeight)
@@ -1022,10 +1021,10 @@ void MapFormat::importMap(short** mapInfo)
 	//drawLineDownToHigh(20, 5, 40, 60);
 }
 
-double MapFormat::round(double d)
-{
-	return floor(d + 0.5);
-}
+//double MapFormat::round(double d)
+//{
+//	return floor(d + 0.5);
+//}
 
 void MapFormat::editMapTile(int x, int y, short tileId)
 {
@@ -1066,8 +1065,8 @@ void MapFormat::writeTile1(int x, int y)
 	editMapTile(x, y-1, (short)0x0361); editMapTile(x+1, y-1, (short)0x0371);
 	editMapTile(x, y-2, (short)0x0381); editMapTile(x+1, y-2, (short)0x0391);
 	// sanitize check  // TODO it doesn't work
-	if (isTileIdAtXY(21, x, y+1)) editMapTile(x, y+1, (short)41);// writeTileHigh(x, y+1);
-	if (isTileIdAtXY(21, x+1, y+1)) editMapTile(x+1, y+1, (short)41); //writeTileHigh(x+1, y+1);
+	if (isTileIdAtXY(21, x, y+1)) writeTileHigh(x, y+1);
+	if (isTileIdAtXY(21, x+1, y+1)) writeTileHigh(x+1, y+1);
 }
 
 void MapFormat::writeTile2(int x, int y)
@@ -1076,8 +1075,8 @@ void MapFormat::writeTile2(int x, int y)
 	editMapTile(x, y-1, (short)0x03c0); editMapTile(x+1, y-1, (short)0x03d0);
 	editMapTile(x, y-2, (short)0x03e0); editMapTile(x+1, y-2, (short)0x03f0);
 	// sanitize check  // TODO it doesn't work
-	if (isTileIdAtXY(22, x, y+1)) editMapTile(x, y+1, (short)41); //writeTileNormal(x, y+1);
-	if (isTileIdAtXY(22, x+1, y+1)) editMapTile(x+1, y+1, (short)41); //writeTileNormal(x+1, y+1);
+	if (isTileIdAtXY(21, x, y+1)) writeTileHigh(x, y+1);
+	if (isTileIdAtXY(21, x+1, y+1)) writeTileHigh(x+1, y+1);
 }
 
 void MapFormat::writeTile3(int x, int y)

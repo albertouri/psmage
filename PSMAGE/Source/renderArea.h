@@ -8,6 +8,7 @@
 #include "Voronoi.h"
 #include "Region.h"
 #include "VPoint.h"
+#include "utils.h"
 #include <map>
 
 typedef std::vector<Region*> RegionSet;

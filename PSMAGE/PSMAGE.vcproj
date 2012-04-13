@@ -363,6 +363,36 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Source\utils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\utils.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine=""
+						AdditionalDependencies=""
+						Outputs=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine=""
+						AdditionalDependencies=""
+						Outputs=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\Source\window.cpp"
 				>
 			</File>
