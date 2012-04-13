@@ -64,8 +64,6 @@ private:
 
 	void writeHeader(std::string name, int size);
 
-	//double round(double d);
-
 	moveMapPoint rectifyInitialPoint1(int x, int y);
 	moveMapPoint rectifyInitialPoint2(int x, int y);
 

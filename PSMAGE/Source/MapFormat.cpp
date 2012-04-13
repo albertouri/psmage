@@ -1012,19 +1012,7 @@ void MapFormat::importMap(short** mapInfo)
 			}
 		}
 	}
-
-	//editMapTile(50, 50, (short)0x0351);
-	//short tileId = getMapTile(50, 50);
-	//writeTile1(50, 50);
-	//writeTile2(52, 50);
-	//drawLineDownToHigh(5, 30, 20, 5);
-	//drawLineDownToHigh(20, 5, 40, 60);
 }
-
-//double MapFormat::round(double d)
-//{
-//	return floor(d + 0.5);
-//}
 
 void MapFormat::editMapTile(int x, int y, short tileId)
 {
@@ -1458,14 +1446,14 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		if (move.printCorner) {
 			if (D <= 0) {
-				if (!isTileIdAtXY(22,x,y)) writeTile3(x,y);
-				else writeTile1(x,y+1);
+				if (x==0 && isTileIdAtXY(22,x,y)) writeTile1(x,y+1);
+				else writeTile3(x,y);
 				D += 2 * ((dy*2) - (dx*-1));
 				x += 2;
 				y -= -1;
 			} else {
-				if (!isTileIdAtXY(22,x-2,y-1)) writeTile3(x-2,y-1);
-				else writeTile1(x-2,y);
+				if (x==0 && isTileIdAtXY(22,x-2,y-1)) writeTile1(x-2,y);
+				else writeTile3(x-2,y-1);
 			}
 		}
 
@@ -1511,7 +1499,7 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 				y += -1;
 			}
 			if (move.toDown && D <= 0) {
-				writeTile1(x,y-1);
+				writeTile1(x,y);
 				D += 2 * ((dx*1) - (dy*2));
 				x += 2;
 				y -= 1;
