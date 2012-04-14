@@ -586,7 +586,25 @@ void RenderArea::generateTXT(int size)
 	MapFormat mapBuffer(size, size);
 	mapBuffer.importMap(mapInfo);
 	// draw hill lines
-	mapBuffer.drawLineDownToHigh(downToHigh, ((double)size/(double)2)/(double)renderMapWidth);
+	double scale = ((double)size/(double)2)/(double)renderMapWidth;
+	//mapBuffer.drawLineDownToHigh(downToHigh, scale);
+	//mapBuffer.drawLineHighToDown(highToDown, scale);
+	mapBuffer.drawLineHighToDown(50, 122, 0, 122);
+	mapBuffer.drawLineHighToDown(13, 34, 0, 53);
+	mapBuffer.drawLineHighToDown(13, 34, 17, 33);
+	mapBuffer.drawLineHighToDown(31, 88, 14, 65);
+	mapBuffer.drawLineHighToDown(17, 97, 17, 112);
+	mapBuffer.drawLineHighToDown(31, 88, 38, 89);
+	mapBuffer.drawLineHighToDown(38, 89, 42, 100);
+	mapBuffer.drawLineHighToDown(64, 110, 42, 100);
+	mapBuffer.drawLineHighToDown(64, 110, 86, 100);
+	mapBuffer.drawLineHighToDown(90, 89, 86, 100);
+	mapBuffer.drawLineHighToDown(97, 88, 90, 89);
+	mapBuffer.drawLineHighToDown(97, 88, 114, 65);
+	mapBuffer.drawLineHighToDown(115, 34, 111, 33);
+	mapBuffer.drawLineHighToDown(111, 97, 111, 112);
+	mapBuffer.drawLineHighToDown(111, 112, 128, 122);
+	mapBuffer.drawLineHighToDown(115, 34, 128, 53);
 	mapBuffer.generateFile();
 }
 

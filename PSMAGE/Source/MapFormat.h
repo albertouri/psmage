@@ -23,6 +23,8 @@ public:
 	void importMap(short** mapInfo);
 	void drawLineDownToHigh(int x0, int y0, int x1, int y1);
 	void drawLineDownToHigh(vor::Edges edges, double scale);
+	void drawLineHighToDown(int x0, int y0, int x1, int y1);
+	void drawLineHighToDown(vor::Edges edges, double scale);
 protected:
 	std::string headerName;
 	int dataSize;
@@ -41,6 +43,8 @@ protected:
 	std::vector<short> tile6;
 	std::vector<short> tile7;
 	std::vector<short> tile8;
+	std::vector<short> tile10;
+	std::vector<short> tile11;
 	
 private:
 	struct moveMapPoint {
@@ -79,6 +83,8 @@ private:
 	void writeTile6(int x, int y);
 	void writeTile7(int x, int y);
 	void writeTile8(int x, int y);
+	void writeTile10(int x, int y);
+	void writeTile11(int x, int y);
 	bool isTileIdAtXY(short tileId, int x, int y);
 
 	bool static sortEdgesByX (const VEdge *edge1, const VEdge *edge2)

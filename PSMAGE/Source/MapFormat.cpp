@@ -44,6 +44,15 @@ MapFormat::MapFormat(short mapWidth, short mapHeight)
 	static const short const10[] = {0x03a3,0x03b3,0x0500,0x0510,0x03c3,0x03d3,0x0522,0x0532,0x05e3,0x05f3};
 	std::vector<short> vector10(const10, const10+sizeOfArray(const10));
 	tile8.insert( tile8.end(), vector10.begin(), vector10.end() );
+
+	static const short const11[] = {0x02e3,0x02f3,0x02c3,0x02d3};
+	std::vector<short> vector11(const11, const11+sizeOfArray(const11));
+	tile10.insert( tile10.end(), vector11.begin(), vector11.end() );
+
+	static const short const12[] = {0x02e3,0x02f3,0x02c3,0x02d3};
+	std::vector<short> vector12(const12, const12+sizeOfArray(const12));
+	tile11.insert( tile11.end(), vector12.begin(), vector12.end() );
+
 }
 
 MapFormat::~MapFormat()
@@ -1111,6 +1120,19 @@ void MapFormat::writeTile8(int x, int y)
 	editMapTile(x-2, y-2, (short)0x0522); editMapTile(x-1, y-2, (short)0x0532); editMapTile(x, y-2, (short)0x05e3); editMapTile(x+1, y-2, (short)0x05f3);
 }
 
+void MapFormat::writeTile10(int x, int y)
+{
+	editMapTile(x, y+1, (short)0x02e3); editMapTile(x+1, y+1, (short)0x02f3);
+	editMapTile(x, y  , (short)0x02c3); editMapTile(x+1, y  , (short)0x02d3);
+}
+
+void MapFormat::writeTile11(int x, int y)
+{
+	editMapTile(x, y+1, (short)0x0322); editMapTile(x+1, y+1, (short)0x0332);
+	editMapTile(x, y  , (short)0x0302); editMapTile(x+1, y  , (short)0x0312);
+}
+
+
 bool MapFormat::isTileIdAtXY(short tileId, int x, int y)
 {
 	short tileStored = getMapTile(x, y);
@@ -1127,6 +1149,8 @@ bool MapFormat::isTileIdAtXY(short tileId, int x, int y)
 		case 6: return std::find(tile6.begin(), tile6.end(), tileStored)!=tile6.end();
 		case 7: return std::find(tile7.begin(), tile7.end(), tileStored)!=tile7.end();
 		case 8: return std::find(tile8.begin(), tile8.end(), tileStored)!=tile8.end();
+		case 10: return std::find(tile10.begin(), tile10.end(), tileStored)!=tile10.end();
+		case 11: return std::find(tile11.begin(), tile11.end(), tileStored)!=tile11.end();
 		case 21: return std::find(normalTerrain1.begin(), normalTerrain1.end(), tileStored)!=normalTerrain1.end();
 		case 22: return std::find(highTerrain1.begin(), highTerrain1.end(), tileStored)!=highTerrain1.end();
 		default: return false;
@@ -1527,6 +1551,234 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		// end line
 		if (lastStepDown) writeTile1(x,y);
+	}
+
+}
+
+void MapFormat::drawLineHighToDown(vor::Edges edges, double scale)
+{
+	edges.sort(&MapFormat::sortEdgesByX);
+	for(vor::Edges::iterator i = edges.begin(); i!= edges.end(); ++i) {
+		// scale points
+		double x0 = (*i)->start->x * scale;
+		double y0 = (*i)->start->y * scale;
+		double x1 = (*i)->end->x * scale;
+		double y1 = (*i)->end->y * scale;
+		// adjust origin x,y to down-left corner
+		y0 = height - y0 + 1;
+		y1 = height - y1 + 1;
+
+		drawLineHighToDown(int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1)));
+		LOG("drawLineHighToDown [ " << (int)round(x0) << ", " << (int)round(y0) << ", " << (int)round(x1) << ", " << (int)round(y1) << "]");
+	}
+}
+
+void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
+{
+	if (x0 > x1){
+		std::swap(x0, x1);
+		std::swap(y0, y1);
+	}
+
+	int dx = x1 - x0;
+	int dy = y1 - y0;
+
+	// check assumption 2 (slope)
+	double slope = 0;
+	if (dx!=0) slope = double(dy) / double(dx);
+
+	int x = x0;
+	int y = y0;
+	int xSteps = 0;
+	int ySteps = 0;
+	bool lastStepUp = true;
+	bool lastStepDown = true;
+
+	if (slope > 0.5 || (slope == 0 && y0 < y1)){ // always +y, conditionally +x
+		//double D = 2 * dx - dy;
+
+		//// Adjust start point looking neighbors
+		//moveMapPoint move = rectifyInitialPoint2(x,y);
+		//D += 2 * ((dx*move.y) - (dy*move.x));
+		//x += move.x;
+		//y += move.y;
+
+		//if (D <= 0 || (move.toDown && D > 0) ) {
+		//	writeTile2(x,y);
+		//	x += 2;
+		//	y += 1;
+		//	D += 2 * (dx - (dy*2));
+		//}
+
+		//while (y <= y1) {
+		//	if (D <= 0) {
+		//		if (isTileIdAtXY(6, x, y-2)) writeTile7(x,y);
+		//		else writeTile6(x,y);
+		//		xSteps = 0;
+		//		ySteps = 2;
+		//		lastStepUp = false;
+		//	} else {
+		//		if (isTileIdAtXY(6, x, y-2)) writeTile8(x,y);
+		//		else writeTile2(x,y);
+		//		xSteps = 2;
+		//		ySteps = 1;
+		//		lastStepUp = true;
+		//	}
+		//	D += 2 * ((dx*ySteps) - (dy*xSteps));
+		//	x += xSteps;
+		//	y += ySteps;
+		//}
+
+		//// Add final corner
+		//if (lastStepUp) writeTile6(x,y);
+
+	} else if (slope > 0 || (slope == 0 && x0 < x1)) { // always +x, conditionally +y
+		double D = 2 * dy - dx;
+
+		// Adjust start point  looking neighbors
+		//moveMapPoint move = rectifyInitialPoint2(x,y);
+		//D += 2 * ((dy*move.x) - (dx*move.y));
+		//x += move.x;
+		//y += move.y;
+
+		//if (D <= 0) {
+		//	D += 2 * (dy*-2);
+		//	x -= 2;
+		//} else {
+		//	D += 2 * (- (dx*-1));
+		//	y += -1;
+		//}
+		//if (move.toDown && D <= 0) {
+		//	// undo moves
+		//	D -= 2 * (dy*-2);
+		//	x += 2;
+		//	D += 2 * (- (dx*-1));
+		//	y += -1;
+		//	// write tile 2
+		//	writeTile2(x,y+1);
+		//	D += 2 * ((dy*2) - dx);
+		//	x += 2;
+		//	y += 1;
+		//}
+
+		while (x <= x1) {
+			if (D <= 0) {
+				writeTile10(x,y-1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepUp = false;
+			} else {
+				writeTile11(x,y);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepUp = true;
+			}
+			D += 2 * ((dy*xSteps) - (dx*ySteps));
+			x += xSteps;
+			y += ySteps;
+		}
+
+		// Add final corner
+		//if (lastStepUp) {
+		//	writeTile6(x,y+1);
+		//} else {
+		//	writeTile6(x-2,y+2);
+		//	writeTileNormal(x-2,y-1);
+		//}
+
+	} else if (slope > -0.5 && slope != 0) { // always +x, conditionally -y
+		dy = abs(dy);
+		double D = 2 * dy - dx;
+
+		//// Add initial corner
+		//moveMapPoint move = rectifyInitialPoint1(x,y);
+		//D += 2 * ((dy*move.x) - (dx*move.y));
+		//x += move.x;
+		//y += move.y;
+
+		//if (move.printCorner) {
+		//	if (D <= 0) {
+		//		if (x==0 && isTileIdAtXY(22,x,y)) writeTile1(x,y+1);
+		//		else writeTile3(x,y);
+		//		D += 2 * ((dy*2) - (dx*-1));
+		//		x += 2;
+		//		y -= -1;
+		//	} else {
+		//		if (x==0 && isTileIdAtXY(22,x-2,y-1)) writeTile1(x-2,y);
+		//		else writeTile3(x-2,y-1);
+		//	}
+		//}
+
+		//while (x < x1) {
+		//	if (D <= 0) {
+		//		writeTile11(x,y);
+		//		xSteps = 2;
+		//		ySteps = -1;
+		//		lastStepDown = false;
+		//	} else {
+		//		writeTile10(x,y-1);
+		//		xSteps = 2;
+		//		ySteps = 1;
+		//		lastStepDown = true;
+		//	}
+		//	D += 2 * ((dy*xSteps) - (dx*ySteps));
+		//	x += xSteps;
+		//	y -= ySteps;
+		//}
+
+	} else { // always -y, conditionally +x
+		//dy = abs(dy);
+		//double D = 2 * dx - dy;
+
+		//// Add initial corner
+		//moveMapPoint move = rectifyInitialPoint1(x,y);
+		//D += 2 * ((dx*move.y) - (dy*move.x));
+		//x += move.x;
+		//y += move.y;
+
+		//if (move.printCorner) {
+		//	if (D > 0) {
+		//		if (!isTileIdAtXY(22,x,y-1)) writeTile3(x,y-1);
+		//		else writeTile1(x,y);
+		//		D += 2 * ((dx*1) - (dy*2));
+		//		x += 2;
+		//		y -= 1;
+		//		writeTileNormal(x,y);
+		//	}
+		//} else { 
+		//	if (!isTileIdAtXY(2, x, y)) {
+		//		D += 2 * ((dx*-1));
+		//		y += -1;
+		//	}
+		//	if (move.toDown && D <= 0) {
+		//		writeTile1(x,y);
+		//		D += 2 * ((dx*1) - (dy*2));
+		//		x += 2;
+		//		y -= 1;
+		//	}
+		//}
+
+		//while (y > y1) {
+		//	if (D <= 0) {
+		//		if (isTileIdAtXY(3, x-1, y)) writeTile4(x,y);
+		//		else if (isTileIdAtXY(1, x-1, y)) writeTile5(x,y);
+		//		else writeTile3(x-2,y-2);
+		//		xSteps = 0;
+		//		ySteps = 2;
+		//		lastStepDown = true;
+		//	} else {
+		//		writeTile1(x,y);
+		//		xSteps = 2;
+		//		ySteps = 1;
+		//		lastStepDown = false;
+		//	}
+		//	D += 2 * ((dx*ySteps) - (dy*xSteps));
+		//	x += xSteps;
+		//	y -= ySteps;
+		//}
+
+		//// end line
+		//if (lastStepDown) writeTile1(x,y);
 	}
 
 }
