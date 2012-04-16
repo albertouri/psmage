@@ -1081,6 +1081,7 @@ void MapFormat::writeTile3(int x, int y)
 	writeTileNormal(x, y+1); editMapTile(x+1, y+1, (short)0x0410);
 	editMapTile(x, y  , (short)0x0423); editMapTile(x+1, y  , (short)0x0433);
 	editMapTile(x, y-1, (short)0x0443); editMapTile(x+1, y-1, (short)0x0453);
+	writeTile10(x+2, y+1);
 }
 
 void MapFormat::writeTile4(int x, int y)
@@ -1266,9 +1267,17 @@ MapFormat::moveMapPoint MapFormat::rectifyInitialPoint2(int x, int y)
 	moveMapPoint move;
 	int x0 = x; 
 	int y0 = y;
+	LOG("head from: " << x << "," << y);
+	LOG(getMapTile(x-3, y+3) << "\t" << getMapTile(x-2, y+3) << "\t" << getMapTile(x-1, y+3) << "\t" << getMapTile(x, y+3) << "\t" << getMapTile(x+1, y+3) << "\t" << getMapTile(x+2, y+3));
+	LOG(getMapTile(x-3, y+2) << "\t" << getMapTile(x-2, y+2) << "\t" << getMapTile(x-1, y+2) << "\t" << getMapTile(x, y+2) << "\t" << getMapTile(x+1, y+2) << "\t" << getMapTile(x+2, y+2));
+	LOG(getMapTile(x-3, y+1) << "\t" << getMapTile(x-2, y+1) << "\t" << getMapTile(x-1, y+1) << "\t" << getMapTile(x, y+1) << "\t" << getMapTile(x+1, y+1) << "\t" << getMapTile(x+2, y+1));
+	LOG(getMapTile(x-3, y  ) << "\t" << getMapTile(x-2, y  ) << "\t" << getMapTile(x-1, y  ) << "\t[" << getMapTile(x, y  ) << "]\t" << getMapTile(x+1, y  ) << "\t" << getMapTile(x+2, y  ));
+	LOG(getMapTile(x-3, y-1) << "\t" << getMapTile(x-2, y-1) << "\t" << getMapTile(x-1, y-1) << "\t" << getMapTile(x, y-1) << "\t" << getMapTile(x+1, y-1) << "\t" << getMapTile(x+2, y-1));
+	LOG(getMapTile(x-3, y-2) << "\t" << getMapTile(x-2, y-2) << "\t" << getMapTile(x-1, y-2) << "\t" << getMapTile(x, y-2) << "\t" << getMapTile(x+1, y-2) << "\t" << getMapTile(x+2, y-2));
 
 	// down to down conditions
 	if (isTileIdAtXY(6, x, y) || isTileIdAtXY(6, x+1, y-1) || isTileIdAtXY(6, x+3, y-1)) {
+		LOG("Tile 6 detected");
 		if (!isTileIdAtXY(6, x, y)) {
 			y -= 1;
 			if (isTileIdAtXY(6, x+1, y)) x += 1;
@@ -1310,6 +1319,7 @@ MapFormat::moveMapPoint MapFormat::rectifyInitialPoint2(int x, int y)
 			else if (!isTileIdAtXY(0, x, y-2)) y -= 2;
 			else if (!isTileIdAtXY(0, x, y+2)) y += 2;
 			else {
+				LOG("No neighboor tile found at " << x << "," << y);
 				move.x = 0;
 				move.y = 0;
 				move.printCorner = true;
@@ -1360,7 +1370,7 @@ void MapFormat::drawLineDownToHigh(vor::Edges edges, double scale)
 		y1 = height - y1 + 1;
 
 		drawLineDownToHigh(int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1)));
-		LOG("[ " << (int)round(x0) << ", " << (int)round(y0) << ", " << (int)round(x1) << ", " << (int)round(y1) << "]");
+		LOG("mapBuffer.drawLineDownToHigh(" << (int)round(x0) << ", " << (int)round(y0) << ", " << (int)round(x1) << ", " << (int)round(y1) << ");");
 	}
 }
 
@@ -1386,6 +1396,7 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 	bool lastStepDown = true;
 
 	if (slope > 0.5 || (slope == 0 && y0 < y1)){ // always +y, conditionally +x
+		//return;
 		double D = 2 * dx - dy;
 
 		// Adjust start point looking neighbors
@@ -1393,6 +1404,9 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 		D += 2 * ((dx*move.y) - (dy*move.x));
 		x += move.x;
 		y += move.y;
+		if (move.x != 0) {
+			LOG("Move head from: " << x0 << "," << y0 << " to: " << x << "," << y);
+		}
 
 		if (D <= 0 || (move.toDown && D > 0) ) {
 			writeTile2(x,y);
@@ -1410,6 +1424,7 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 				lastStepUp = false;
 			} else {
 				if (isTileIdAtXY(6, x, y-2)) writeTile8(x,y);
+				else if (y+1 > y1) writeTile6(x,y); // final corner
 				else writeTile2(x,y);
 				xSteps = 2;
 				ySteps = 1;
@@ -1421,9 +1436,10 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 		}
 
 		// Add final corner
-		if (lastStepUp) writeTile6(x,y);
+		//if (lastStepUp) writeTile6(x,y);
 
 	} else if (slope > 0 || (slope == 0 && x0 < x1)) { // always +x, conditionally +y
+		return;
 		double D = 2 * dy - dx;
 
 		// Adjust start point  looking neighbors
@@ -1432,13 +1448,21 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 		x += move.x;
 		y += move.y;
 
+		//if (D <= 0) {
+		//	D += 2 * (dy*-2);
+		//	x -= 2;
+		//} else {
+		//	D += 2 * (- (dx*-1));
+		//	y += -1;
+		//}
+
 		if (D <= 0) {
-			D += 2 * (dy*-2);
-			x -= 2;
-		} else {
-			D += 2 * (- (dx*-1));
-			y += -1;
+			writeTile2(x,y);
+			D += 2 * ((dy*2) - (dx));
+			x += 2;
+			y += 1;
 		}
+
 		if (move.toDown && D <= 0) {
 			// undo moves
 			D -= 2 * (dy*-2);
@@ -1454,12 +1478,14 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		while (x <= x1) {
 			if (D <= 0) {
-				writeTile1(x,y);
+				writeTile1(x,y-1);
 				xSteps = 2;
 				ySteps = -1;
 				lastStepUp = false;
 			} else {
-				writeTile2(x,y+1);
+				//if (x+2 > x1) writeTile6(x,y); // final corner
+				//else writeTile2(x,y);
+				writeTile2(x,y);
 				xSteps = 2;
 				ySteps = 1;
 				lastStepUp = true;
@@ -1471,13 +1497,15 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		// Add final corner
 		if (lastStepUp) {
-			writeTile6(x,y+1);
+			writeTile6(x,y);
 		} else {
-			writeTile6(x-2,y+2);
-			writeTileNormal(x-2,y-1);
+		//if (!lastStepUp) {
+			writeTile6(x-2,y+1);
+			writeTileNormal(x-2,y-2);
 		}
 
 	} else if (slope > -0.5 && slope != 0) { // always +x, conditionally -y
+		return;
 		dy = abs(dy);
 		double D = 2 * dy - dx;
 
@@ -1518,6 +1546,7 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 		}
 
 	} else { // always -y, conditionally +x
+		//return;
 		dy = abs(dy);
 		double D = 2 * dx - dy;
 
@@ -1528,14 +1557,16 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 		y += move.y;
 
 		if (move.printCorner) {
-			if (D > 0) {
+			//if (D > 0) {
 				if (!isTileIdAtXY(22,x,y-1)) writeTile3(x,y-1);
 				else writeTile1(x,y);
 				D += 2 * ((dx*1) - (dy*2));
 				x += 2;
 				y -= 1;
-				writeTileNormal(x,y);
-			}
+				//writeTileNormal(x,y);
+			//} else {
+
+			//}
 		} else { 
 			if (!isTileIdAtXY(2, x, y)) {
 				D += 2 * ((dx*-1));
@@ -1551,9 +1582,10 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 
 		while (y > y1) {
 			if (D <= 0) {
+				if (y-1 <= y1) break;
 				if (isTileIdAtXY(3, x-1, y)) writeTile4(x,y);
 				else if (isTileIdAtXY(1, x-1, y)) writeTile5(x,y);
-				else writeTile3(x-2,y-2);
+				//else writeTile3(x-2,y-2);
 				xSteps = 0;
 				ySteps = 2;
 				lastStepDown = true;
@@ -1571,7 +1603,8 @@ void MapFormat::drawLineDownToHigh(int x0, int y0, int x1, int y1)
 		// end line
 		if (lastStepDown) writeTile1(x,y);
 	}
-
+	//editMapTile(x0, y0, (short)0x1881);
+	//editMapTile(x1, y1, (short)0x1881);
 }
 
 void MapFormat::drawLineHighToDown(vor::Edges edges, double scale)
@@ -1588,7 +1621,7 @@ void MapFormat::drawLineHighToDown(vor::Edges edges, double scale)
 		y1 = height - y1 + 1;
 
 		drawLineHighToDown(int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1)));
-		LOG("drawLineHighToDown [ " << (int)round(x0) << ", " << (int)round(y0) << ", " << (int)round(x1) << ", " << (int)round(y1) << "]");
+		LOG("mapBuffer.drawLineHighToDown(" << (int)round(x0) << ", " << (int)round(y0) << ", " << (int)round(x1) << ", " << (int)round(y1) << ");");
 	}
 }
 
@@ -1614,29 +1647,39 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 	bool lastStepDown = true;
 
 	if (slope > 0.5 || (slope == 0 && y0 < y1)){ // always +y, conditionally +x
+		//return;
 		double D = 2 * dx - dy;
 
-		//// Adjust start point looking neighbors
-		//moveMapPoint move = rectifyInitialPoint2(x,y);
-		//D += 2 * ((dx*move.y) - (dy*move.x));
-		//x += move.x;
-		//y += move.y;
+		// Adjust start point looking neighbors
+		moveMapPoint move = rectifyInitialPoint3(x,y);
+		if (move.printCorner) {
+			if (move.toDown) {
+				move.x += 1;
+				//move.y += 1;
+			} else {
+				move.x += 1;
+				move.y += 2;
+			}
+			D += 2 * ((dx*move.y) - (dy*move.x));
+			x += move.x;
+			y += move.y;
+		}
 
-		//if (D <= 0 || (move.toDown && D > 0) ) {
-		//	writeTile2(x,y);
-		//	x += 2;
-		//	y += 1;
-		//	D += 2 * (dx - (dy*2));
-		//}
+		if (D <= 0) {
+			writeTile10(x,y-1);
+			x += 2;
+			y += 1;
+			D += 2 * (dx - (dy*2));
+		}
 
 		while (y <= y1) {
 			if (D <= 0) {
-				writeTile4b(x+2,y);
+				writeTile4b(x,y);
 				xSteps = 0;
 				ySteps = 2;
 				lastStepUp = true;
 			} else {
-				writeTile10(x+2,y-1);
+				writeTile10(x,y-1);
 				xSteps = 2;
 				ySteps = 1;
 				lastStepUp = false;
@@ -1647,39 +1690,28 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		}
 
 		// Add final corner
-		if (lastStepUp) writeTile10(x+2,y-1);
+		if (lastStepUp) writeTile10(x,y-1);
 
 	} else if (slope > 0 || (slope == 0 && x0 < x1)) { // always +x, conditionally +y
+		//return;
 		double D = 2 * dy - dx;
 
-		// Adjust start point  looking neighbors
-		//moveMapPoint move = rectifyInitialPoint2(x,y);
-		//D += 2 * ((dy*move.x) - (dx*move.y));
-		//x += move.x;
-		//y += move.y;
-
-		//if (D <= 0) {
-		//	D += 2 * (dy*-2);
-		//	x -= 2;
-		//} else {
-		//	D += 2 * (- (dx*-1));
-		//	y += -1;
-		//}
-		//if (move.toDown && D <= 0) {
-		//	// undo moves
-		//	D -= 2 * (dy*-2);
-		//	x += 2;
-		//	D += 2 * (- (dx*-1));
-		//	y += -1;
-		//	// write tile 2
-		//	writeTile2(x,y+1);
-		//	D += 2 * ((dy*2) - dx);
-		//	x += 2;
-		//	y += 1;
-		//}
+		moveMapPoint move = rectifyInitialPoint3(x,y);
+		if (move.printCorner) {
+			if (move.toDown) {
+				//move.x += 1;
+				move.y += -1;
+			} else {
+				move.x += -1;
+				//move.y += -1;
+			}
+			D += 2 * ((dy*move.x) - (dx*move.y));
+			x += move.x;
+			y += move.y;
+		}
 
 		if (D <= 0) {
-			writeTile10(x,y+1);
+			writeTile10(x,y);
 			D += 2 * ((dy*2) - dx);
 			x += 2;
 			y += 1;
@@ -1687,12 +1719,12 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 
 		while (x <= x1) {
 			if (D <= 0) {
-				writeTile11(x,y);
+				writeTile11(x,y-1);
 				xSteps = 2;
 				ySteps = -1;
 				lastStepUp = false;
 			} else {
-				writeTile10(x,y+1);
+				writeTile10(x,y);
 				xSteps = 2;
 				ySteps = 1;
 				lastStepUp = true;
@@ -1704,31 +1736,27 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 
 		// Add final corner
 		if (!lastStepUp) {
-			writeTile10(x,y+1); // TODO this can be improved, instead of add one extra tile, rectify previous ones
+			writeTile10(x,y); // TODO this can be improved, instead of add one extra tile, rectify previous ones
 		}
 
 	} else if (slope > -0.5 && slope != 0) { // always +x, conditionally -y
+		//return;
 		dy = abs(dy);
 		double D = 2 * dy - dx;
 
-		//// Add initial corner
-		//moveMapPoint move = rectifyInitialPoint1(x,y);
-		//D += 2 * ((dy*move.x) - (dx*move.y));
-		//x += move.x;
-		//y += move.y;
-
-		//if (move.printCorner) {
-		//	if (D <= 0) {
-		//		if (x==0 && isTileIdAtXY(22,x,y)) writeTile1(x,y+1);
-		//		else writeTile3(x,y);
-		//		D += 2 * ((dy*2) - (dx*-1));
-		//		x += 2;
-		//		y -= -1;
-		//	} else {
-		//		if (x==0 && isTileIdAtXY(22,x-2,y-1)) writeTile1(x-2,y);
-		//		else writeTile3(x-2,y-1);
-		//	}
-		//}
+		moveMapPoint move = rectifyInitialPoint3(x,y);
+		if (move.printCorner) {
+			if (move.toDown) {
+				move.x += 1;
+				//move.y += -1;
+			} else {
+				move.x += 1;
+				move.y += 1;
+			}
+			D += 2 * ((dy*move.x) - (dx*-move.y));
+			x += move.x;
+			y += move.y;
+		}
 
 		if (D <= 0) {
 			writeTile11(x,y-1);
@@ -1757,39 +1785,28 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		// TODO matching ending needed (1: rearrange end point, 2: force ending with tile 11)
 
 	} else { // always -y, conditionally +x
+		//return;
 		dy = abs(dy);
 		double D = 2 * dx - dy;
-
+		
 		//// Add initial corner
-		//moveMapPoint move = rectifyInitialPoint1(x,y);
-		//D += 2 * ((dx*move.y) - (dy*move.x));
-		//x += move.x;
-		//y += move.y;
-
-		//if (move.printCorner) {
-		//	if (D > 0) {
-		//		if (!isTileIdAtXY(22,x,y-1)) writeTile3(x,y-1);
-		//		else writeTile1(x,y);
-		//		D += 2 * ((dx*1) - (dy*2));
-		//		x += 2;
-		//		y -= 1;
-		//		writeTileNormal(x,y);
-		//	}
-		//} else { 
-		//	if (!isTileIdAtXY(2, x, y)) {
-		//		D += 2 * ((dx*-1));
-		//		y += -1;
-		//	}
-		//	if (move.toDown && D <= 0) {
-		//		writeTile1(x,y);
-		//		D += 2 * ((dx*1) - (dy*2));
-		//		x += 2;
-		//		y -= 1;
-		//	}
-		//}
+		moveMapPoint move = rectifyInitialPoint3(x,y);
+		if (move.printCorner) {
+			if (move.toDown) {
+				move.x += -1;
+				move.y += 1;
+			} else {
+				move.x += 1;
+				move.y += 1;
+				//editMapTile(move.x, move.y+1, (short)0x0322);
+			}
+			D += 2 * ((dy*move.x) - (dx*-move.y));
+			x += move.x;
+			y += move.y;
+		}
 
 		while (y > y1) {
-			if (D <= 0) {
+			if (D <= 0 && y-2 > y1) {
 				if (isTileIdAtXY(7, x, y)) writeTile7b(x,y);
 				else writeTile7(x,y);
 				xSteps = 0;
@@ -1807,8 +1824,99 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 			y -= ySteps;
 		}
 
-		//// end line
-		//if (lastStepDown) writeTile1(x,y);
+		// end line // TODO matching ending needed (1: rearrange end point, 2: force ending with tile 11)
+		if (lastStepDown) {
+			writeTile12(x,y+1);
+		}
+	}
+	//editMapTile(x0, y0, (short)0x1881);
+	//editMapTile(x1, y1, (short)0x1881);
+
+}
+
+VPoint MapFormat::searchTile(int seedX, int seedY, short tileId)
+{
+	//search a tileId near a seed point and return its location
+	//searches outward in a spiral.
+	int x      = seedX+2;
+	int y      = seedY;
+	int length = 1;
+	int j      = 0;
+	bool first = true;
+	int dx     = 0;
+	int dy     = 1;	
+	while (length < 12) //We'll ride the spiral at most 12 tiles away
+	{
+		//if this is the tile, return this tile position
+		if (getMapTile(x, y) == tileId)
+			return VPoint(x, y);
+
+		//otherwise, move to another position
+		x = x + dx;
+		y = y + dy;
+		//count how many steps we take in this direction
+		j++;
+		if (j == length) { //if we've reached the end, its time to turn
+			j = 0;	//reset step counter
+
+			//Spiral out. Keep going.
+			if (!first)
+				length++; //increment step counter if needed
+
+
+			first =! first; //first=true for every other turn so we spiral out at the right rate
+
+			//turn counter clockwise 90 degrees:
+			if (dx == 0) {
+				dx = dy;
+				dy = 0;
+			} else {
+				dy = -dx;
+				dx = 0;
+			}
+		}
+		//Spiral out. Keep going.
+	}
+	return VPoint(-1, -1);
+}
+
+MapFormat::moveMapPoint MapFormat::rectifyInitialPoint3(int x, int y)
+{
+	moveMapPoint move;
+	move.x = 0;
+	move.y = 0;
+	move.printCorner = true; // true if we found a previous line
+	move.toDown = false;
+	int x0 = x; 
+	int y0 = y;
+	VPoint tileFound(-1, -1);
+
+	// search tile 10
+	tileFound = searchTile(x, y, (short)0x02d3);
+	if (tileFound.x != -1) {
+		if (getMapTile(x+2, y+2) == (short)0x02d3) { // adjust extra tile
+			tileFound.x += 2;
+			tileFound.y += 2;
+		}
+		move.x = (short)tileFound.x - x0;
+		move.y = (short)tileFound.y - y0;
+		move.toDown = false;
+		return move;
 	}
 
+	// search tile 11/12
+	tileFound = searchTile(x, y, (short)0x0312);
+	if (tileFound.x != -1) {
+		move.x = (short)tileFound.x - x0;
+		move.y = (short)tileFound.y - y0;
+		move.toDown = true;
+		return move;
+	}
+
+	// search tile 7/7b
+	//TODO
+
+	// we didn't found a previous line
+	move.printCorner = false;
+	return move;
 }

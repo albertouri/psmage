@@ -70,6 +70,7 @@ private:
 
 	moveMapPoint rectifyInitialPoint1(int x, int y);
 	moveMapPoint rectifyInitialPoint2(int x, int y);
+	moveMapPoint rectifyInitialPoint3(int x, int y);
 
 	void editMapTile(int x, int y, short tileId);
 	short getMapTile(int x, int y);
@@ -89,6 +90,7 @@ private:
 	void writeTile11(int x, int y);
 	void writeTile12(int x, int y);
 	bool isTileIdAtXY(short tileId, int x, int y);
+	VPoint searchTile(int seedX, int seedY, short tileId);
 
 	bool static sortEdgesByX (const VEdge *edge1, const VEdge *edge2)
 	{
