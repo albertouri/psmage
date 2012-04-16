@@ -4,7 +4,10 @@
 \usepackage{helvet}
 \usepackage{courier}
 \usepackage{subfig}
-\usepackage{graphicx}
+\usepackage{graphicx,color}
+
+\newcommand{\XXX}[3]{{\color{blue}{{\bf [#1: } {\tt #3} {\it -#2-}{\bf ]}}}}
+
 \frenchspacing
 \pdfinfo{
 /Title (PSMAGE: Procedural StarCraft MAp GEneration)
@@ -24,29 +27,35 @@ Philadelphia\\
 \begin{abstract}
 \begin{quote}
 Game designers can spend a lot of time tuning their maps to make it well balanced. This paper presents an algorithm for generating balanced maps for the popular real-time strategy (RTS) game StarCraft. We use Voronoi diagrams to randomly generate polygons as starting point. Then different properties are assigned to the polygons with some fitness functions in order to make consistent and balanced maps.
+\XXX{Alberto}{santi}{Here you claim that this is an approach to generate ``balanced maps'', but nothing in the paper supports this. We need metrics that support this claim.}
 \end{quote}
 \end{abstract}
 
 
 \section{Introduction} % (fold)
 \label{sec:introduction}
-Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many ﬂavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants, histories, ...) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation, ...). PCG can also be used in different ways in games, for example for offline content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, saving main memory or DVD storage, academic curiosity or the possibility of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+Procedural content generation (PCG) refers to the automatic or semi-automatic generation of game content. PCG comes in many flavors, as there are many types of game content that can be generated (such as levels, adventures, characters, weapons, planets, plants or stories) and many ways in which it can be generated (many based on AI/CI methods such as constraint satisfaction, planning or evolutionary computation). PCG can also be used in different ways in games, for example for offline content creation during game development, support tools for human designers or fully automatic online content creation based on player actions. Similarly, there are different motivations for using PCG, such as speeding up game development, saving human designer effort/cost, reducing storage requirements, or the possibility of completely new types of games. What is clear, however, is that PCG is gaining increasing attention among both commercial game developers, indie developers and academic game researchers.
+\XXX{Alberto}{santi}{We need cites all over the previous paragraph. One for PCG, one for each technique you say that has been attempted, etc.} 
+\XXX{Alberto}{santi}{This paragraph is fine, but it's not good as the first paragraph of the paper. What we need is to introduce what WE present, not PCG in general. Remember the structure of an introduction is: WHAT, WHY, HOW. First say WHAT you have done, then WHY you have done it, and then HOW you have done it. But leave the intro to me, we'll do this at the end :)} 
 
-In this paper, we present an approach to generating maps to real-time strategy games. More speciﬁcally, we use an iterative process to generate maps for a tournament strategy games, where balance is key. Our algorithm automatically generates balanced maps for a specific strategy game: StarCraft.
+
+In this paper, we present an approach to generating maps for real-time strategy (RTS) games. More specifically, we use an iterative process to generate maps for a tournament strategy games, where balance is key. Our algorithm automatically generates balanced maps for a specific strategy game: StarCraft.
 % section introduction (end)
 
 
 \section{Problem definition} % (fold)
 \label{sec:problem_definition}
-As mentioned above, creating balanced maps designed for competitive play can be time consuming for a designer, and difficult to do with conventional tools. A procedurally generated map that can ensure a balanced match up can save a designer time of creating maps, as well as guaranteeing a fair playing field for the players. For larger game studios, this can mean lower costs on newer content and for smaller studios, this could save time where resources are limited.
+ As mentioned above, creating balanced maps designed for competitive play can be time consuming for a designer, and difficult to do with conventional tools. A procedurally generated map that can ensure a balanced match up can save a designer time of creating maps, as well as guaranteeing a fair playing field for the players. For larger game studios, this can mean lower costs on newer content and for smaller studios, this could save time where resources are limited.
 
 As the ease of procedurally generated map creation increases, so does the potential of non-professionals creating competitive maps. If the usability of a map creator is sufficient, the barrier of entry for designing maps is significantly lowered for gamers, not developers, to make their own content for practice, casual play with friends or competitions.
+\XXX{Alberto}{santi}{The two paragraphs currently here talk about ``motivation'' rather than ``problem definition''. They should be moved to the introduction. Here we need a formal ``problem definition'', i.e. defining the inputs, the outputs and the restrictions over the outputs that define the problem. Also, since we talk about ``balance'', here we should provide some intuitive definition of what do we mean by balance. Then later on, we need a section where we define specific metrics for balance.}
 
 % section problem_definition (end)
 
 
 \section{Related work} % (fold)
 \label{sec:related_work}
+\XXX{Alberto}{santi}{We need to expand this section, not just map generation for Starcraft, that is a very narrow topic that is unlikely to have many past publications. We need to look for map generation in games in general. Also, if the goal is to generate ``balanced maps'', we need to see if anyone has worked on something similar: measuring ``balancedness'' in strategy games, etc.} 
 This is not the first time where StarCraft maps are used as a testbed to do research. Luke Perkins developed the library BWTA to do terrain analysis on StarCraft maps \cite{Perkins10}. Z\'{e}pir researched on a StarCraft 2D map conversion into a Warcraft III 3D map \cite{Zepir}. And Togelius et al. also presented a methodology based on search for generating StarCraft maps \cite{Togelius10}.
 % section related_work (end)
 
@@ -63,9 +72,11 @@ The algorithm presented in this paper can be outlined as the following sequence 
 	\item Parse output into a .chk file
 	\item MPQ archive
 \end{enumerate}
+\XXX{Alberto}{santi}{As we talked about, in AI research papers, things like data formats, etc are not relevant. The last 2 steps should be removed from this paper.} 
 Each step shall now be described in detail. For illustrative purposes, the result of each step will be shown.
 
 \subsection{1. Generate a random seed point}
+\XXX{Alberto}{santi}{If the paper format doesn't allow section numbers, you CANNOT add them like this :)}
 First of all we must set the size of the map and the number of regions desired. Then we generate a random seed point for each region inside the map. The output of this step is shown in Figure \ref{fig:random-points}.
 
 \begin{figure}[ht]
