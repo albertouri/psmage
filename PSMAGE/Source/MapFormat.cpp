@@ -1091,6 +1091,13 @@ void MapFormat::writeTile4(int x, int y)
 	editMapTile(x-2, y-3, (short)0x0443); editMapTile(x-1, y-3, (short)0x0453);
 }
 
+void MapFormat::writeTile4b(int x, int y)
+{
+	writeTileNormal(x-2, y+1);			  editMapTile(x-1, y+1, (short)0x0410);
+	editMapTile(x-2, y  , (short)0x0423); editMapTile(x-1, y  , (short)0x0433); editMapTile(x, y  , (short)0x04c1); editMapTile(x+1, y  , (short)0x04d1);
+	editMapTile(x-2, y-1, (short)0x0443); editMapTile(x-1, y-1, (short)0x0613);	editMapTile(x, y-1, (short)0x04e1); editMapTile(x+1, y-1, (short)0x04f1);
+}
+
 void MapFormat::writeTile5(int x, int y)
 {
 																				editMapTile(x, y  , (short)0x04c0); editMapTile(x+1, y  , (short)0x04d0);
@@ -1113,6 +1120,12 @@ void MapFormat::writeTile7(int x, int y)
 	editMapTile(x-2, y-2, (short)0x0521); editMapTile(x-1, y-2, (short)0x0531); editMapTile(x, y-2, (short)0x0623); editMapTile(x+1, y-2, (short)0x0633);
 }
 
+void MapFormat::writeTile7b(int x, int y)
+{
+	editMapTile(x-2, y-1, (short)0x0502); editMapTile(x-1, y-1, (short)0x0512); editMapTile(x, y-1, (short)0x0482); editMapTile(x+1, y-1, (short)0x0492);
+	editMapTile(x-2, y-2, (short)0x0521); editMapTile(x-1, y-2, (short)0x0531); editMapTile(x, y-2, (short)0x0623); editMapTile(x+1, y-2, (short)0x0633);
+}
+
 void MapFormat::writeTile8(int x, int y)
 {
 																				editMapTile(x, y  , (short)0x03a3); editMapTile(x+1, y  , (short)0x03b3);
@@ -1129,6 +1142,12 @@ void MapFormat::writeTile10(int x, int y)
 void MapFormat::writeTile11(int x, int y)
 {
 	editMapTile(x, y+1, (short)0x0322); editMapTile(x+1, y+1, (short)0x0332);
+	editMapTile(x, y  , (short)0x0302); editMapTile(x+1, y  , (short)0x0312);
+}
+
+void MapFormat::writeTile12(int x, int y)
+{
+	editMapTile(x, y+1, (short)0x05a2); editMapTile(x+1, y+1, (short)0x05b2);
 	editMapTile(x, y  , (short)0x0302); editMapTile(x+1, y  , (short)0x0312);
 }
 
@@ -1595,7 +1614,7 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 	bool lastStepDown = true;
 
 	if (slope > 0.5 || (slope == 0 && y0 < y1)){ // always +y, conditionally +x
-		//double D = 2 * dx - dy;
+		double D = 2 * dx - dy;
 
 		//// Adjust start point looking neighbors
 		//moveMapPoint move = rectifyInitialPoint2(x,y);
@@ -1610,27 +1629,25 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		//	D += 2 * (dx - (dy*2));
 		//}
 
-		//while (y <= y1) {
-		//	if (D <= 0) {
-		//		if (isTileIdAtXY(6, x, y-2)) writeTile7(x,y);
-		//		else writeTile6(x,y);
-		//		xSteps = 0;
-		//		ySteps = 2;
-		//		lastStepUp = false;
-		//	} else {
-		//		if (isTileIdAtXY(6, x, y-2)) writeTile8(x,y);
-		//		else writeTile2(x,y);
-		//		xSteps = 2;
-		//		ySteps = 1;
-		//		lastStepUp = true;
-		//	}
-		//	D += 2 * ((dx*ySteps) - (dy*xSteps));
-		//	x += xSteps;
-		//	y += ySteps;
-		//}
+		while (y <= y1) {
+			if (D <= 0) {
+				writeTile4b(x+2,y);
+				xSteps = 0;
+				ySteps = 2;
+				lastStepUp = true;
+			} else {
+				writeTile10(x+2,y-1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepUp = false;
+			}
+			D += 2 * ((dx*ySteps) - (dy*xSteps));
+			x += xSteps;
+			y += ySteps;
+		}
 
-		//// Add final corner
-		//if (lastStepUp) writeTile6(x,y);
+		// Add final corner
+		if (lastStepUp) writeTile10(x+2,y-1);
 
 	} else if (slope > 0 || (slope == 0 && x0 < x1)) { // always +x, conditionally +y
 		double D = 2 * dy - dx;
@@ -1661,14 +1678,21 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		//	y += 1;
 		//}
 
+		if (D <= 0) {
+			writeTile10(x,y+1);
+			D += 2 * ((dy*2) - dx);
+			x += 2;
+			y += 1;
+		}
+
 		while (x <= x1) {
 			if (D <= 0) {
-				writeTile10(x,y-1);
+				writeTile11(x,y);
 				xSteps = 2;
-				ySteps = 1;
+				ySteps = -1;
 				lastStepUp = false;
 			} else {
-				writeTile11(x,y);
+				writeTile10(x,y+1);
 				xSteps = 2;
 				ySteps = 1;
 				lastStepUp = true;
@@ -1679,12 +1703,9 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		}
 
 		// Add final corner
-		//if (lastStepUp) {
-		//	writeTile6(x,y+1);
-		//} else {
-		//	writeTile6(x-2,y+2);
-		//	writeTileNormal(x-2,y-1);
-		//}
+		if (!lastStepUp) {
+			writeTile10(x,y+1); // TODO this can be improved, instead of add one extra tile, rectify previous ones
+		}
 
 	} else if (slope > -0.5 && slope != 0) { // always +x, conditionally -y
 		dy = abs(dy);
@@ -1709,26 +1730,35 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		//	}
 		//}
 
-		//while (x < x1) {
-		//	if (D <= 0) {
-		//		writeTile11(x,y);
-		//		xSteps = 2;
-		//		ySteps = -1;
-		//		lastStepDown = false;
-		//	} else {
-		//		writeTile10(x,y-1);
-		//		xSteps = 2;
-		//		ySteps = 1;
-		//		lastStepDown = true;
-		//	}
-		//	D += 2 * ((dy*xSteps) - (dx*ySteps));
-		//	x += xSteps;
-		//	y -= ySteps;
-		//}
+		if (D <= 0) {
+			writeTile11(x,y-1);
+			D += 2 * ((dy*2) - (dx));
+			x += 2;
+			y -= 1;
+		}
+
+		while (x < x1) {
+			if (D <= 0) {
+				writeTile10(x,y);
+				xSteps = 2;
+				ySteps = -1;
+				lastStepDown = false;
+			} else {
+				writeTile11(x,y-1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepDown = true;
+			}
+			D += 2 * ((dy*xSteps) - (dx*ySteps));
+			x += xSteps;
+			y -= ySteps;
+		}
+
+		// TODO matching ending needed (1: rearrange end point, 2: force ending with tile 11)
 
 	} else { // always -y, conditionally +x
-		//dy = abs(dy);
-		//double D = 2 * dx - dy;
+		dy = abs(dy);
+		double D = 2 * dx - dy;
 
 		//// Add initial corner
 		//moveMapPoint move = rectifyInitialPoint1(x,y);
@@ -1758,24 +1788,24 @@ void MapFormat::drawLineHighToDown(int x0, int y0, int x1, int y1)
 		//	}
 		//}
 
-		//while (y > y1) {
-		//	if (D <= 0) {
-		//		if (isTileIdAtXY(3, x-1, y)) writeTile4(x,y);
-		//		else if (isTileIdAtXY(1, x-1, y)) writeTile5(x,y);
-		//		else writeTile3(x-2,y-2);
-		//		xSteps = 0;
-		//		ySteps = 2;
-		//		lastStepDown = true;
-		//	} else {
-		//		writeTile1(x,y);
-		//		xSteps = 2;
-		//		ySteps = 1;
-		//		lastStepDown = false;
-		//	}
-		//	D += 2 * ((dx*ySteps) - (dy*xSteps));
-		//	x += xSteps;
-		//	y -= ySteps;
-		//}
+		while (y > y1) {
+			if (D <= 0) {
+				if (isTileIdAtXY(7, x, y)) writeTile7b(x,y);
+				else writeTile7(x,y);
+				xSteps = 0;
+				ySteps = 2;
+				lastStepDown = true;
+			} else {
+				if (isTileIdAtXY(7, x, y)) writeTile12(x,y-1);
+				else writeTile11(x,y-1);
+				xSteps = 2;
+				ySteps = 1;
+				lastStepDown = false;
+			}
+			D += 2 * ((dx*ySteps) - (dy*xSteps));
+			x += xSteps;
+			y -= ySteps;
+		}
 
 		//// end line
 		//if (lastStepDown) writeTile1(x,y);

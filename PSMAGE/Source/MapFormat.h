@@ -79,12 +79,15 @@ private:
 	void writeTile2(int x, int y);
 	void writeTile3(int x, int y);
 	void writeTile4(int x, int y);
+	void writeTile4b(int x, int y);
 	void writeTile5(int x, int y);
 	void writeTile6(int x, int y);
 	void writeTile7(int x, int y);
+	void writeTile7b(int x, int y);
 	void writeTile8(int x, int y);
 	void writeTile10(int x, int y);
 	void writeTile11(int x, int y);
+	void writeTile12(int x, int y);
 	bool isTileIdAtXY(short tileId, int x, int y);
 
 	bool static sortEdgesByX (const VEdge *edge1, const VEdge *edge2)

@@ -17,6 +17,7 @@ Window::Window()
 	mapSizeBox->addItem("128x128", QVariant(128));
 	mapSizeBox->addItem("196x196", QVariant(196));
 	mapSizeBox->addItem("256x256", QVariant(256));
+	mapSizeBox->setCurrentIndex(2);
 	mapSizeLabel = new QLabel(tr("Map size:"));
 	mapSizeLabel->setBuddy(mapSizeBox);
 
