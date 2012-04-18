@@ -22,10 +22,10 @@ public:
 	Region(VPoint * s)
 	{
 		seed = s;
-		minXborderMap = FALSE;
-		maxXborderMap = FALSE;
-		minYborderMap = FALSE;
-		maxYborderMap = FALSE;
+		minXborderMap = false;
+		maxXborderMap = false;
+		minYborderMap = false;
+		maxYborderMap = false;
 		elevation = 1;
 	}
 
