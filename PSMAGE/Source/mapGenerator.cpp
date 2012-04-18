@@ -1,5 +1,9 @@
 #include "mapGenerator.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 MapGenerator::MapGenerator(int mapWidthIn, int mapHeightIn)
 {
 	mapWidth = mapWidthIn;
@@ -11,20 +15,147 @@ MapGenerator::MapGenerator(int mapWidthIn, int mapHeightIn)
 }
 
 
-void MapGenerator::generateRandomPoints(int numPoints)
+void MapGenerator::generateRandomPoints(int pointsToGenerate)
 {
 	delete ver;
 	ver = new vor::Vertices();
 	regions.clear();
 	downToHigh.clear();
 	highToDown.clear();
-	for(int i=0; i<numPoints; i++) {
-		VPoint *seed = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
-		ver->push_back(seed);
-		Region *newRegion = new Region(seed);
+
+	PoissonDiskSampler(150, pointsToGenerate);
+
+	//for(int i=0; i<pointsToGenerate; i++) {
+	//	VPoint *seed = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
+	//	ver->push_back(seed);
+	//	Region *newRegion = new Region(seed);
+	//	regions.push_back(newRegion);
+	//}
+}
+
+void MapGenerator::PoissonDiskSampler(double minDist, int pointsToGenerate)
+{
+	double cellSize = minDist / sqrt((double)2);
+	int gridWidth = (int) (mapWidth / cellSize) + 1;
+	int gridHeight = (int) (mapHeight / cellSize) + 1;
+
+	std::vector<VPoint*> activeList;
+	std::vector<VPoint*> pointList;
+	VPointMatrix grid;
+	grid.resize( gridHeight , std::vector<std::vector<VPoint*>>( gridWidth , NULL ) );
+
+	//generate the first point randomly
+	VPoint *firstPoint = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
+
+	//update containers
+	activeList.push_back(firstPoint);
+	pointList.push_back(firstPoint);
+	VPoint *gridPoint = imageToGrid(firstPoint, cellSize);
+	std::vector<VPoint*> gridCell = grid[(int)gridPoint->x][(int)gridPoint->y];
+	gridCell.push_back(firstPoint);
+
+
+	while (!activeList.empty()) {
+		int listIndex = rand() % activeList.size();
+
+		VPoint* point = activeList[listIndex];
+		bool found = false;
+
+		for (int k = 0; k < pointsToGenerate; k++) {
+			found |= addNextPoint(grid, activeList, pointList, point, minDist, cellSize);
+			if (pointList.size() == pointsToGenerate) break;
+		}
+		if (pointList.size() == pointsToGenerate) break;
+
+		if (!found) {
+			activeList.erase (activeList.begin()+listIndex);
+		}
+	}
+
+	// Final points
+	for(std::vector<VPoint*>::iterator i = pointList.begin(); i!= pointList.end(); ++i) {
+		ver->push_back(*i);
+		Region *newRegion = new Region(*i);
 		regions.push_back(newRegion);
 	}
+
 }
+
+VPoint* MapGenerator::imageToGrid(VPoint *point, double cellSize)
+{
+	double gridX = (point->x / cellSize);
+	double gridY = (point->y / cellSize);
+	return new VPoint(gridX, gridY);
+}
+
+bool MapGenerator::addNextPoint(VPointMatrix &grid, std::vector<VPoint*> &activeList, std::vector<VPoint*> &pointList, VPoint* point, double minDist, double cellSize)
+{
+	int gridWidth = (int) (mapWidth / cellSize) + 1;
+	int gridHeight = (int) (mapHeight / cellSize) + 1;
+
+
+	bool found = false;
+	//double fraction = distribution.getDouble((int) point.x, (int) point.y);
+	//VPoint* q = generateRandomAround(point, fraction * minDist);
+	VPoint* q = generateRandomAround(point, minDist);
+
+	if ((q->x >= 0) && (q->x < mapWidth) && (q->y > 0) && (q->y < mapHeight)) {
+		VPoint* qIndex = imageToGrid(q, cellSize);
+
+		bool tooClose = false;
+
+		for (int i = std::max(0, int(qIndex->x - 2)); (i < std::min(gridWidth, int(qIndex->x + 3))) && !tooClose; i++) {
+			for (int j = std::max(0, int(qIndex->y - 2)); (j < std::min(gridHeight, int(qIndex->y + 3))) && !tooClose; j++) {
+				std::vector<VPoint*> gridCell = grid[i][j];
+				for(std::vector<VPoint*>::iterator k = gridCell.begin(); k!= gridCell.end(); ++k) {
+					// compute distance
+					//if (distance(*k, q) < minDist * fraction) {
+					if (distance(*k, q) < minDist) {
+						tooClose = true;
+					}
+				}
+			}
+		}
+
+		if (!tooClose) {
+			found = true;
+			activeList.push_back(q);
+			pointList.push_back(q);
+			std::vector<VPoint*> gridCell = grid[(int)qIndex->x][(int)qIndex->y];
+			gridCell.push_back(q);
+		}
+	}
+
+	return found;
+}
+
+/**
+ * Generates a random point in the analus around the given point. The analus has inner radius minimum distance and
+ * outer radius twice that.
+ * 
+ * @param centre
+ *            The point around which the random point should be.
+ * @return A new point, randomly selected.
+ */
+VPoint* MapGenerator::generateRandomAround(VPoint* centre, double minDist)
+{
+	double radius = (minDist + minDist * (double)rand()/(double)RAND_MAX);
+	double angle = 2 * M_PI * (double)rand()/(double)RAND_MAX;
+
+	double newX = radius * sin(angle);
+	double newY = radius * cos(angle);
+
+	return new VPoint(centre->x + newX, centre->y + newY);
+}
+
+// TODO add in vector 2D class
+double MapGenerator::distance(VPoint* p1, VPoint* p2)
+{
+	double x = p2->x - p1->x;
+	double y = p2->y - p1->y;
+	return sqrt(x * x + y * y);
+}
+
 
 void MapGenerator::generateVoroni()
 {
