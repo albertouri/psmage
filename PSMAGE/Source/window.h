@@ -29,6 +29,8 @@ private:
 	QComboBox *mapSizeBox;
 	QLabel *regionsLabel;
 	QSpinBox *regionsSpinBox;
+	QLabel *minDistanceLabel;
+	QSpinBox *minDistanceSpinBox;
 	QPushButton *toTxtButton;
 	QPushButton *generateRegionsButton;
 	QPushButton *genElevationsButton;

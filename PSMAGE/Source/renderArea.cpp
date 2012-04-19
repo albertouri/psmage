@@ -6,43 +6,23 @@ RenderArea::RenderArea(QWidget *parent)
 	renderMapWidth = 600;
 	renderMapHeight = 600;
 	numRegions = 10;
+	minDistance = 150;
 	elevations = false;
 	mapMirrored = false;
 
 	generator = new MapGenerator(renderMapWidth, renderMapHeight);
-	generator->generateRandomPoints(numRegions);
+	generator->generateRandomPoints(numRegions, (double)minDistance);
 	generator->generateVoroni();
 
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
 }
 
-
-QSize RenderArea::minimumSizeHint() const
-{
-	return QSize(601, 601);
-}
-
-QSize RenderArea::sizeHint() const
-{
-	return QSize(601, 601);
-}
-
-int RenderArea::getMapSize() const
-{
-	return renderMapHeight;
-}
-
-int RenderArea::getNumRegions() const
-{
-	return numRegions;
-}
-
-void RenderArea::generateRegions(int numRegions)
+void RenderArea::generateRegions(int numRegions, int minDistance)
 {
 	elevations = false;
 	mapMirrored = false;
-	generator->generateRandomPoints(numRegions);
+	generator->generateRandomPoints(numRegions, (double)minDistance);
 	generator->generateVoroni();
 	update();
 }

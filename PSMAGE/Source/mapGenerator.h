@@ -17,7 +17,7 @@ public:
 	MapGenerator() {};
 	MapGenerator(int mapWidthIn, int mapHeightIn);
 
-	void generateRandomPoints(int pointsToGenerate);
+	void generateRandomPoints(int pointsToGenerate, double minDist);
 	void PoissonDiskSampler(double minDist, int pointsToGenerate);
 	VPoint* imageToGrid(VPoint *point, double cellSize);
 	bool addNextPoint(VPointMatrix &grid, std::vector<VPoint*> &activeList, std::vector<VPoint*> &pointList, VPoint* point, double minDist, double cellSize);

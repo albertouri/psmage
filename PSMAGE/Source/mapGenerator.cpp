@@ -15,7 +15,7 @@ MapGenerator::MapGenerator(int mapWidthIn, int mapHeightIn)
 }
 
 
-void MapGenerator::generateRandomPoints(int pointsToGenerate)
+void MapGenerator::generateRandomPoints(int pointsToGenerate, double minDist)
 {
 	delete ver;
 	ver = new vor::Vertices();
@@ -23,14 +23,32 @@ void MapGenerator::generateRandomPoints(int pointsToGenerate)
 	downToHigh.clear();
 	highToDown.clear();
 
-	PoissonDiskSampler(150, pointsToGenerate);
+	//PoissonDiskSampler(minDist, pointsToGenerate);
 
+	// Random points
 	//for(int i=0; i<pointsToGenerate; i++) {
 	//	VPoint *seed = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
 	//	ver->push_back(seed);
 	//	Region *newRegion = new Region(seed);
 	//	regions.push_back(newRegion);
 	//}
+
+	// Random points with minimum distance
+	bool tooClose;
+	int steps = 0;
+	while (ver->size() < (unsigned int)pointsToGenerate && steps < 1000 ) {
+		steps++;
+		tooClose = false;
+		VPoint *seed = new VPoint( mapWidth * (double)rand()/(double)RAND_MAX , mapHeight * (double)rand()/(double)RAND_MAX );
+		for(std::vector<VPoint*>::iterator k = ver->begin(); k!= ver->end(); ++k) {
+			if (distance(*k, seed) < minDist) tooClose = true;
+		}
+		if (!tooClose) {
+			ver->push_back(seed);
+			Region *newRegion = new Region(seed);
+			regions.push_back(newRegion);
+		}
+	}
 }
 
 void MapGenerator::PoissonDiskSampler(double minDist, int pointsToGenerate)

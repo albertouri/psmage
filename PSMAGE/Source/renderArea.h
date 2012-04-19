@@ -16,16 +16,19 @@ class RenderArea : public QWidget
 public:
 	static const int minRegions = 2;
 	static const int maxRegions = 30;
+	static const int minMinDistance = 10;
+	static const int maxMinDistance = 500;
 
 	RenderArea(QWidget *parent = 0);
 
-	QSize minimumSizeHint() const;
-	QSize sizeHint() const;
-	int getNumRegions() const;
-	int getMapSize() const;
+	QSize minimumSizeHint() const { return QSize(601, 601); };
+	QSize sizeHint() const { return QSize(601, 601); };
+	int getNumRegions() const { return numRegions; };
+	int getMinDistance() const { return minDistance; };
+	int getMapSize() const { return renderMapHeight; };
 
 public slots:
-	void generateRegions(int numRegions);
+	void generateRegions(int numRegions, int minDistance);
 	void generateElevations();
 	void mirroringMap();
 	void generateTXT(int size);
@@ -35,6 +38,7 @@ protected:
 
 private:
 	int numRegions;
+	int minDistance;
 	int renderMapWidth;
 	int renderMapHeight;
 	MapGenerator* generator;

@@ -27,6 +27,12 @@ Window::Window()
 	regionsLabel = new QLabel(tr("# Regions:"));
 	regionsLabel->setBuddy(regionsSpinBox);
 
+	minDistanceSpinBox = new QSpinBox;
+	minDistanceSpinBox->setRange(renderArea->minMinDistance, renderArea->maxMinDistance);
+	minDistanceSpinBox->setValue(renderArea->getMinDistance());
+	minDistanceLabel = new QLabel(tr("Min. distance:"));
+	minDistanceLabel->setBuddy(minDistanceSpinBox);
+
 	toTxtButton = new QPushButton(tr("Generate CHK Map"));
 	generateRegionsButton = new QPushButton(tr("Generate Regions"));
 	genElevationsButton = new QPushButton(tr("Generate Elevations"));
@@ -41,16 +47,18 @@ Window::Window()
 
 	// Layout
 	QGridLayout *mainLayout = new QGridLayout;
-	mainLayout->addWidget(renderArea, 0, 2, 7, 1);
+	mainLayout->addWidget(renderArea, 0, 2, 8, 1);
 	mainLayout->addWidget(regionsLabel, 0, 0, Qt::AlignRight);
 	mainLayout->addWidget(regionsSpinBox, 0, 1);
-	mainLayout->addWidget(generateRegionsButton, 1, 0, 1, 2);
-	mainLayout->addWidget(genElevationsButton, 2, 0, 1, 2);
-	mainLayout->addWidget(mirroringButton, 3, 0, 1, 2);
-	mainLayout->addWidget(mapSizeLabel, 4, 0, Qt::AlignRight);
-	mainLayout->addWidget(mapSizeBox, 4, 1);
-	mainLayout->addWidget(toTxtButton, 5, 0, 1, 2);
-	mainLayout->setRowStretch(6, 50);
+	mainLayout->addWidget(minDistanceLabel, 1, 0, Qt::AlignRight);
+	mainLayout->addWidget(minDistanceSpinBox, 1, 1);
+	mainLayout->addWidget(generateRegionsButton, 2, 0, 1, 2);
+	mainLayout->addWidget(genElevationsButton, 3, 0, 1, 2);
+	mainLayout->addWidget(mirroringButton, 4, 0, 1, 2);
+	mainLayout->addWidget(mapSizeLabel, 5, 0, Qt::AlignRight);
+	mainLayout->addWidget(mapSizeBox, 5, 1);
+	mainLayout->addWidget(toTxtButton, 6, 0, 1, 2);
+	mainLayout->setRowStretch(7, 50);
 	setLayout(mainLayout);
 
 	setWindowTitle(tr("Procedural Starcraft MAp GEnerator"));
@@ -58,7 +66,7 @@ Window::Window()
 
 void Window::generateRegions()
 {
-	renderArea->generateRegions(regionsSpinBox->value());
+	renderArea->generateRegions(regionsSpinBox->value(), minDistanceSpinBox->value());
 }
 
 void Window::generateElevations()
