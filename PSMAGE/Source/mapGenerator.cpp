@@ -11,7 +11,8 @@ MapGenerator::MapGenerator(int mapWidthIn, int mapHeightIn)
 	v = new vor::Voronoi();
 	ver = new vor::Vertices();
 
-	srand((unsigned int)time(0));
+//	srand((unsigned int)time(0));
+	srand((unsigned int)1);
 }
 
 
@@ -182,16 +183,19 @@ void MapGenerator::generateVoroni()
 
 	// Generate Regions Graph (and clipping edges)
 	//LOG("Start clipping");
+//	LOG("Dimensions: " << mapWidth << "," << mapHeight);
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
-		//LOG("[ IN] " << (*i)->start->x << "," << (*i)->start->y << " " << (*i)->end->x << "," << (*i)->end->y);
+//		LOG("[ IN] " << (*i)->start->x << "," << (*i)->start->y << " " << (*i)->end->x << "," << (*i)->end->y);
 		clipping((*i)->start, (*i)->end, mapWidth, mapHeight);
-		//LOG("[OUT] " << (*i)->start->x << "," << (*i)->start->y << " " << (*i)->end->x << "," << (*i)->end->y);
+//		LOG("[OUT] " << (*i)->start->x << "," << (*i)->start->y << " " << (*i)->end->x << "," << (*i)->end->y);
+
 		if ( !((int)(*i)->start->x == (int)(*i)->end->x && (int)(*i)->start->y == (int)(*i)->end->y) ) { // ignoring edge of length=0
 			// ignoring bad borders
 			if (!(((int)(*i)->start->x == 0 && (int)(*i)->end->x == 0) ||
 				((int)(*i)->start->x == mapWidth && (int)(*i)->end->x == mapWidth) ||
 				((int)(*i)->start->y == 0 && (int)(*i)->end->y == 0) ||
 				((int)(*i)->start->y == mapHeight && (int)(*i)->end->y == mapHeight)) ) {
+//					LOG("Added.");
 					Region *region1 = getRegion((*i)->left);
 					Region *region2 = getRegion((*i)->right);
 					region1->neighbors.push_back(region2);
@@ -200,6 +204,7 @@ void MapGenerator::generateVoroni()
 					region2->borders.push_back(*i);
 			}
 		}
+		
 	}
 
 	// Generate border map edges
@@ -264,7 +269,9 @@ void MapGenerator::generateVoroni()
 						(*i)->minYborderMap = true;
 						if (y0edges.size() == 2) { 
 							(*i)->borders.push_front(new VEdge(new VPoint(mapWidth, 0), y0edges[0]));
-						} else { /* UNEXPECTED END, MISSING EDGES? */ }
+						} else { 
+							// UNEXPECTED END, MISSING EDGES? 
+						}
 					}	
 				}
 			} else { // we are at 0,0; check y0edges
@@ -282,7 +289,9 @@ void MapGenerator::generateVoroni()
 						(*i)->maxYborderMap = true;
 						if (yMaxedges.size() == 2) { 
 							(*i)->borders.push_back(new VEdge(new VPoint(mapWidth, mapHeight), yMaxedges[0]));
-						} else { /* UNEXPECTED END, MISSING EDGES? */ }
+						} else { 
+							// UNEXPECTED END, MISSING EDGES? 
+						}
 					}	
 				}
 			}
@@ -318,7 +327,9 @@ void MapGenerator::generateVoroni()
 						(*i)->minYborderMap = true;
 						if (y0edges.size() == 2) { 
 							(*i)->borders.push_front(new VEdge(new VPoint(0, 0), y0edges[0]));
-						} else { /* UNEXPECTED END, MISSING EDGES? */ }
+						} else { 
+							// UNEXPECTED END, MISSING EDGES? 
+						}
 					}
 				}
 			} else {
@@ -336,7 +347,9 @@ void MapGenerator::generateVoroni()
 						(*i)->maxYborderMap = true;
 						if (yMaxedges.size() == 2) { 
 							(*i)->borders.push_front(new VEdge(new VPoint(0, mapHeight), yMaxedges[0]));
-						} else { /* UNEXPECTED END, MISSING EDGES? */ }
+						} else { 
+							// UNEXPECTED END, MISSING EDGES?
+						}
 					}
 				}
 			}
@@ -350,7 +363,6 @@ void MapGenerator::generateVoroni()
 			(*i)->maxYborderMap = true;
 			(*i)->borders.push_back(new VEdge(yMaxedges[0], yMaxedges[2]));
 		}
-
 		x0edges.clear();
 		xMaxedges.clear();
 		y0edges.clear();

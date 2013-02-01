@@ -53,7 +53,8 @@ Edges * Voronoi::GetEdges(Vertices * v, int w, int h)
 	{
 		if( (*i)->neighbour) 
 		{
-			(*i)->start = (*i)->neighbour->end;
+//			(*i)->start = (*i)->neighbour->end;
+			(*i)->start = new VPoint((*i)->neighbour->end->x,(*i)->neighbour->end->y);	// Santi: I created a new VPoint, so that the pointer is not shared between start and end
 			delete (*i)->neighbour;
 		}
 	}
@@ -91,7 +92,8 @@ void	Voronoi::InsertParabola(VPoint * p)
 	points.push_back(start);
 
 	VEdge * el = new VEdge(start, par->site, p);
-	VEdge * er = new VEdge(start, p, par->site);
+//	VEdge * er = new VEdge(start, p, par->site);
+	VEdge * er = new VEdge(new VPoint(start->x, start->y), new VPoint(p->x, p->y), new VPoint(par->site->x, par->site->y));	// Santi, removed shared pointers
 
 	el->neighbour = er;
 	edges->push_back(el);
@@ -130,11 +132,16 @@ void	Voronoi::RemoveParabola(VEvent * e)
 	if(p0->cEvent){ deleted.insert(p0->cEvent); p0->cEvent = 0; }
 	if(p2->cEvent){ deleted.insert(p2->cEvent); p2->cEvent = 0; }
 
-	VPoint * p = new VPoint(e->point->x, GetY(p1->site, e->point->x));
-	points.push_back(p);
+	// Santi: here there was only 1 VPoint created, and then used 3 times, I split it in 3
+	VPoint * pa = new VPoint(e->point->x, GetY(p1->site, e->point->x));
+	VPoint * pb = new VPoint(e->point->x, GetY(p1->site, e->point->x));
+	VPoint * pc = new VPoint(e->point->x, GetY(p1->site, e->point->x));
+	points.push_back(pa);
+	points.push_back(pb);
+	points.push_back(pc);
 
-	xl->edge->end = p;
-	xr->edge->end = p;
+	xl->edge->end = pa;
+	xr->edge->end = pb;
 
 	VParabola * higher;
 	VParabola * par = p1;
@@ -144,7 +151,8 @@ void	Voronoi::RemoveParabola(VEvent * e)
 		if(par == xl) higher = xl;
 		if(par == xr) higher = xr;
 	}
-	higher->edge = new VEdge(p, p0->site, p2->site);
+//	higher->edge = new VEdge(p, p0->site, p2->site);
+	higher->edge = new VEdge(pc, new VPoint(p0->site->x, p0->site->y), new VPoint(p2->site->x, p2->site->y)); // Santi, removed shared pointers
 	edges->push_back(higher->edge);
 
 	VParabola * gparent = p1->parent->parent;
