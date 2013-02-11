@@ -16,6 +16,9 @@ RenderArea::RenderArea(QWidget *parent)
 
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
+
+	generateElevations();
+	mirroringMap();
 }
 
 void RenderArea::generateRegions(int numRegions, int minDistance)
@@ -47,8 +50,8 @@ void RenderArea::mirroringMap()
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
 	RegionSet regions = generator->getRegions();
-	vor::Edges downToHigh = generator->getDownToHigh();
-	vor::Edges highToDown = generator->getHighToDown();
+	Edges downToHigh = generator->getDownToHigh();
+	Edges highToDown = generator->getHighToDown();
 	QPainter painter(this);
 
 	// Draw mark
@@ -72,7 +75,7 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 			// Sorting vertexes of polygon
 			std::vector<VEdge *> edgesVector;
 			std::vector<QPoint> polyVvector;
-			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+			for(Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
 				edgesVector.push_back(*j);
 			}
 			polyVvector.push_back(QPoint((int)edgesVector[0]->start->x, (int)edgesVector[0]->start->y));
@@ -106,20 +109,20 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 	// Draw Voronoi Edges
 	painter.setPen(palette().dark().color());
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
-		for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+		for(Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
 			painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
 		}
 	}
 
 	// Draw down to high edges
 	painter.setPen(QPen(Qt::red));
-	for(vor::Edges::iterator j = downToHigh.begin(); j!= downToHigh.end(); ++j) {
+	for(Edges::iterator j = downToHigh.begin(); j!= downToHigh.end(); ++j) {
 		painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
 	}
 
 	// Draw high to down edges
 	painter.setPen(QPen(Qt::blue));
-	for(vor::Edges::iterator j = highToDown.begin(); j!= highToDown.end(); ++j) {
+	for(Edges::iterator j = highToDown.begin(); j!= highToDown.end(); ++j) {
 		painter.drawLine((*j)->start->x, (*j)->start->y, (*j)->end->x, (*j)->end->y);
 	}
 
@@ -135,14 +138,13 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 	}
 	painter.setPen(QPen(Qt::blue, 3));
 	painter.drawPoints(points, j);
-
 }
 
 void RenderArea::generateTXT(int size)
 {
 	RegionSet regions = generator->getRegions();
-	vor::Edges downToHigh = generator->getDownToHigh();
-	vor::Edges highToDown = generator->getHighToDown();
+	Edges downToHigh = generator->getDownToHigh();
+	Edges highToDown = generator->getHighToDown();
 	// Paint ******
 	// Color brushes
 	QColor *Qblack = new QColor(Qt::black);
@@ -168,7 +170,7 @@ void RenderArea::generateTXT(int size)
 			// Sorting vertexes of polygon
 			std::vector<VEdge *> edgesVector;
 			std::vector<QPoint> polyVvector;
-			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+			for(Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
 				edgesVector.push_back(*j);
 			}
 			polyVvector.push_back(QPoint((int)edgesVector[0]->start->x, (int)edgesVector[0]->start->y));
@@ -235,7 +237,11 @@ void RenderArea::generateTXT(int size)
 	mapBuffer.importMap(mapInfo);
 	// draw hill lines
 	double scale = ((double)size/(double)2)/(double)renderMapWidth;
-	mapBuffer.drawLineDownToHigh(downToHigh, scale);
-	mapBuffer.drawLineHighToDown(highToDown, scale);
+
+	//mapBuffer.drawLineDownToHigh(downToHigh, scale);
+	//mapBuffer.drawLineHighToDown(highToDown, scale);
+
+	mapBuffer.drawLines(downToHigh, highToDown, scale);
+
 	mapBuffer.generateFile();
 }

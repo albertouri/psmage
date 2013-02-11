@@ -12,7 +12,7 @@ public:
 	VPoint * seed; // seed point of the region
 	// enum type of region
 	std::list<Region *> neighbors; // region neighbors
-	vor::Edges borders; // edges of the region
+	Edges borders; // edges of the region
 	bool minXborderMap;
 	bool maxXborderMap;
 	bool minYborderMap;

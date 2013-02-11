@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="PSMAGE"
 	ProjectGUID="{36FF1134-E7D8-441A-8C2B-5CCBC3FF9BB7}"
 	RootNamespace="PSMAGE"
@@ -274,6 +274,178 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="Converter"
+				>
+				<File
+					RelativePath=".\Source\MapFormat.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\MapFormat.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Generator"
+				>
+				<File
+					RelativePath=".\Source\mapGenerator.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\mapGenerator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Region.h"
+					>
+				</File>
+				<Filter
+					Name="Voronoi"
+					Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+					UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+					>
+					<File
+						RelativePath=".\Source\VEdge.h"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Source\VEvent.h"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Source\Voronoi.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Voronoi.h"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Source\VParabola.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\VParabola.h"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Source\VPoint.h"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								Description="Realizando paso de compilación personalizada"
+								CommandLine=""
+								AdditionalDependencies=""
+								Outputs=""
+							/>
+						</FileConfiguration>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resources"
@@ -388,178 +560,6 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="Converter"
-			>
-			<File
-				RelativePath=".\Source\MapFormat.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\MapFormat.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Generator"
-			>
-			<File
-				RelativePath=".\Source\mapGenerator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\mapGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Region.h"
-				>
-			</File>
-			<Filter
-				Name="Voronoi"
-				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-				>
-				<File
-					RelativePath=".\Source\VEdge.h"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Source\VEvent.h"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Source\Voronoi.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Voronoi.h"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Source\VParabola.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\VParabola.h"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Source\VPoint.h"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Realizando paso de compilación personalizada"
-							CommandLine=""
-							AdditionalDependencies=""
-							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>

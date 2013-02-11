@@ -28,27 +28,28 @@ public:
 	RegionSet getRegions() { return regions; };
 
 	void generateElevations();
-	vor::Edges getDownToHigh() { return downToHigh; };
-	vor::Edges getHighToDown() { return highToDown; };
+	Edges getDownToHigh() { return downToHigh; };
+	Edges getHighToDown() { return highToDown; };
 
 	void mirroringMap();
+
+	Vertices * ver;
 
 private:
 	int mapWidth;
 	int mapHeight;
 
-	vor::Voronoi * v;
-	vor::Vertices * ver;
-	vor::Edges * edg;
+	Voronoi * v;
+	Edges * edg;
 	RegionSet regions;
 
-	vor::Vertices x0edges; // contains tuple of elements P1 and P2 of an edge (where P1 is on x0edge)
-	vor::Vertices xMaxedges;
-	vor::Vertices y0edges;
-	vor::Vertices yMaxedges;
+	Vertices x0edges; // contains tuple of elements P1 and P2 of an edge (where P1 is on x0edge)
+	Vertices xMaxedges;
+	Vertices y0edges;
+	Vertices yMaxedges;
 
-	vor::Edges downToHigh;
-	vor::Edges highToDown;
+	Edges downToHigh;
+	Edges highToDown;
 
 	Region* getRegion(VPoint *location);
 	void generateHillEdges();

@@ -5,20 +5,19 @@
 	A structure that stores 2D point
 */
 
-struct VPoint
-{
+struct VPoint {
 public:
-    
 	double x, y;
 
-	/*
-		Constructor for structure; x, y - coordinates
-	*/
-
-    VPoint(double nx, double ny) 
-	{
+    VPoint(double nx, double ny) {
 		x = nx; 
 		y = ny;
+	}
+
+	bool operator<( const VPoint& n) const {
+		if (x != n.x)
+			return (x < n.x);
+		return (y < n.y);
 	}
 };
 

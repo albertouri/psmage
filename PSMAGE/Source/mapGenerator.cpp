@@ -8,18 +8,18 @@ MapGenerator::MapGenerator(int mapWidthIn, int mapHeightIn)
 {
 	mapWidth = mapWidthIn;
 	mapHeight = mapHeightIn;
-	v = new vor::Voronoi();
-	ver = new vor::Vertices();
+	v = new Voronoi();
+	ver = new Vertices();
 
-//	srand((unsigned int)time(0));
-	srand((unsigned int)1);
+	srand((unsigned int)time(0));
 }
 
 
 void MapGenerator::generateRandomPoints(int pointsToGenerate, double minDist)
 {
+	srand((unsigned int)4); // for debug purpose 
 	delete ver;
-	ver = new vor::Vertices();
+	ver = new Vertices();
 	regions.clear();
 	downToHigh.clear();
 	highToDown.clear();
@@ -184,7 +184,7 @@ void MapGenerator::generateVoroni()
 	// Generate Regions Graph (and clipping edges)
 	//LOG("Start clipping");
 //	LOG("Dimensions: " << mapWidth << "," << mapHeight);
-	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
+	for(Edges::iterator i = edg->begin(); i!= edg->end(); ++i) {
 //		LOG("[ IN] " << (*i)->start->x << "," << (*i)->start->y << " " << (*i)->end->x << "," << (*i)->end->y);
 		clipping((*i)->start, (*i)->end, mapWidth, mapHeight);
 //		LOG("[OUT] " << (*i)->start->x << "," << (*i)->start->y << " " << (*i)->end->x << "," << (*i)->end->y);
@@ -210,7 +210,7 @@ void MapGenerator::generateVoroni()
 	// Generate border map edges
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
 		// Iterate over edges of a region
-		for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+		for(Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
 			// Store x=0 edges
 			if ((*j)->start->x <= 0) {
 				x0edges.push_back((*j)->start);
@@ -409,7 +409,7 @@ void MapGenerator::generateHillEdges()
 
 	for(RegionSet::iterator i = regions.begin(); i!= regions.end(); ++i) {
 		if ((*i)->elevation == 2) { // Iterate over edges of high regions
-			for(vor::Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
+			for(Edges::iterator j = (*i)->borders.begin(); j!= (*i)->borders.end(); ++j) {
 				Region *leftRegion = getRegion((*j)->left);
 				Region *rightRegion = getRegion((*j)->right);
 				if (leftRegion != 0 && rightRegion != 0 && leftRegion->elevation !=  rightRegion->elevation ) {
@@ -462,8 +462,8 @@ void MapGenerator::mirroringMap()
 		Region *newRegion = new Region(**i);
 		newRegion->seed = new VPoint(*(*i)->seed);
 		newRegion->seed->y = (mapHeight*2)-newRegion->seed->y;
-		vor::Edges::iterator o = (*i)->borders.begin();
-		for(vor::Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
+		Edges::iterator o = (*i)->borders.begin();
+		for(Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
 			(*j) = new VEdge(**o);
 			(*j)->start = new VPoint(*(*o)->start);
 			(*j)->end = new VPoint(*(*o)->end);
@@ -490,8 +490,8 @@ void MapGenerator::mirroringMap()
 		Region *newRegion = new Region(**i);
 		newRegion->seed = new VPoint(*(*i)->seed);
 		newRegion->seed->x = (mapWidth*2)-newRegion->seed->x;
-		vor::Edges::iterator o = (*i)->borders.begin();
-		for(vor::Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
+		Edges::iterator o = (*i)->borders.begin();
+		for(Edges::iterator j = newRegion->borders.begin(); j!= newRegion->borders.end(); ++j,++o) {
 			(*j) = new VEdge(**o);
 			(*j)->start = new VPoint(*(*o)->start);
 			(*j)->end = new VPoint(*(*o)->end);

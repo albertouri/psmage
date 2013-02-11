@@ -4,17 +4,25 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <time.h>
 #include "Voronoi.h"
 #include "utils.h"
 
+struct IPoint {
+	int x,y;
+	IPoint(int nx, int ny) {
+		x = nx; 
+		y = ny;
+	}
+};
 
 template <typename T, std::size_t N>
 inline std::size_t sizeOfArray( T (&)[N] ) { return N; }
+typedef std::map<VPoint, IPoint> VPointToIPoint;
 
-class MapFormat
-{
+class MapFormat {
 public:
 	MapFormat(short mapWidth, short mapHeight);
 	~MapFormat();
@@ -22,9 +30,13 @@ public:
 	void generateFile();
 	void importMap(short** mapInfo);
 	void drawLineDownToHigh(int x0, int y0, int x1, int y1);
-	void drawLineDownToHigh(vor::Edges edges, double scale);
+	void drawLineDownToHigh(Edges edges, double scale);
 	void drawLineHighToDown(int x0, int y0, int x1, int y1);
-	void drawLineHighToDown(vor::Edges edges, double scale);
+	void drawLineHighToDown(Edges edges, double scale);
+	void drawLines(Edges edgesDownToHigh, Edges edgesHighToDown, double scale);
+
+	VPointToIPoint vertexMap;
+
 protected:
 	std::string headerName;
 	int dataSize;
@@ -73,6 +85,7 @@ private:
 	moveMapPoint rectifyInitialPoint3(int x, int y);
 
 	void editMapTile(int x, int y, short tileId);
+	int getMapTileId(int x, int y);
 	short getMapTile(int x, int y);
 	void writeTileNormal(int x, int y);
 	void writeTileHigh(int x, int y);
