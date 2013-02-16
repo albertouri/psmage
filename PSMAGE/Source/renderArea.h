@@ -7,7 +7,7 @@
 #include <QWidget>
 
 #include "mapGenerator.h"
-#include "MapFormat.h"
+#include "MapFile.h"
 
 class RenderArea : public QWidget
 {

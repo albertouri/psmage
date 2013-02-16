@@ -230,18 +230,12 @@ void RenderArea::generateTXT(int size)
 	//fileTxt.close();
 
 
+	MapFile mapFile(size, size);
 
+	mapFile.importMap(mapInfo);
 
-
-	MapFormat mapBuffer(size, size);
-	mapBuffer.importMap(mapInfo);
-	// draw hill lines
 	double scale = ((double)size/(double)2)/(double)renderMapWidth;
+	mapFile.drawHills(downToHigh, highToDown, scale);
 
-	//mapBuffer.drawLineDownToHigh(downToHigh, scale);
-	//mapBuffer.drawLineHighToDown(highToDown, scale);
-
-	mapBuffer.drawLines(downToHigh, highToDown, scale);
-
-	mapBuffer.generateFile();
+	mapFile.generateFile();
 }

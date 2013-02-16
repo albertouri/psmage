@@ -1,7 +1,6 @@
 #ifndef MapFormat_h
 #define MapFormat_h
 
-#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -27,24 +26,16 @@ public:
 	MapFormat(short mapWidth, short mapHeight);
 	~MapFormat();
 
-	void generateFile();
 	void importMap(short** mapInfo);
 	void drawLineDownToHigh(int x0, int y0, int x1, int y1);
-	void drawLineDownToHigh(Edges edges, double scale);
 	void drawLineHighToDown(int x0, int y0, int x1, int y1);
-	void drawLineHighToDown(Edges edges, double scale);
-	void drawLines(Edges edgesDownToHigh, Edges edgesHighToDown, double scale);
+	void drawHills(Edges edgesDownToHigh, Edges edgesHighToDown, double scale);
+
+	std::vector<char> buffer;
 
 	VPointToIPoint vertexMap;
 
 protected:
-	std::string headerName;
-	int dataSize;
-	std::string charData;
-	short intData;
-	int longData;
-	std::vector<char> buffer;
-	std::vector<char> mapBuffer;
 	std::vector<short> normalTerrain1;
 	std::vector<short> highTerrain1;
 	std::vector<short> tile1;
@@ -65,45 +56,37 @@ private:
 		bool printCorner;
 		bool toDown;
 	};
-
-	template < class T >
-	void writeBytes( const T s ) {
-		buffer.insert(buffer.end(), reinterpret_cast<const char*>( &s ), reinterpret_cast<const char*>( &s ) + sizeof( T ));
-	}
-	void writeBytes( std::string text ) { buffer.insert( buffer.end(), text.begin(), text.end() ); }
-	void writeBytes( std::vector<char> buffer2 ) { buffer.insert( buffer.end(), buffer2.begin(), buffer2.end() );  }
+	
 	template < class T >
 	void writeMapBytes( const T s ) {
-		mapBuffer.insert(mapBuffer.end(), reinterpret_cast<const char*>( &s ), reinterpret_cast<const char*>( &s ) + sizeof( T ));
+		buffer.insert(buffer.end(), reinterpret_cast<const char*>( &s ), reinterpret_cast<const char*>( &s ) + sizeof( T ));
 	}
-	void writeMapBytes( std::string text ) { mapBuffer.insert( mapBuffer.end(), text.begin(), text.end() ); }
-
-	void writeHeader(std::string name, int size);
+	void writeMapBytes( std::string text ) { buffer.insert( buffer.end(), text.begin(), text.end() ); }
 
 	moveMapPoint rectifyInitialPoint1(int x, int y);
 	moveMapPoint rectifyInitialPoint2(int x, int y);
 	moveMapPoint rectifyInitialPoint3(int x, int y);
 
-	void editMapTile(int x, int y, short tileId);
-	int getMapTileId(int x, int y);
-	short getMapTile(int x, int y);
-	void writeTileNormal(int x, int y);
-	void writeTileHigh(int x, int y);
-	void writeTile1(int x, int y);
-	void writeTile2(int x, int y);
-	void writeTile3(int x, int y);
-	void writeTile4(int x, int y);
-	void writeTile4b(int x, int y);
-	void writeTile5(int x, int y);
-	void writeTile6(int x, int y);
-	void writeTile7(int x, int y);
-	void writeTile7b(int x, int y);
-	void writeTile8(int x, int y);
-	void writeTile10(int x, int y);
-	void writeTile11(int x, int y);
-	void writeTile12(int x, int y);
-	bool isTileIdAtXY(short tileId, int x, int y);
-	VPoint searchTile(int seedX, int seedY, short tileId);
+	void	editMapTile(int x, int y, short tileId);
+	int		getMapTileId(int x, int y);
+	short	getMapTile(int x, int y);
+	void	writeTileNormal(int x, int y);
+	void	writeTileHigh(int x, int y);
+	void	writeTile1(int x, int y);
+	void	writeTile2(int x, int y);
+	void	writeTile3(int x, int y);
+	void	writeTile4(int x, int y);
+	void	writeTile4b(int x, int y);
+	void	writeTile5(int x, int y);
+	void	writeTile6(int x, int y);
+	void	writeTile7(int x, int y);
+	void	writeTile7b(int x, int y);
+	void	writeTile8(int x, int y);
+	void	writeTile10(int x, int y);
+	void	writeTile11(int x, int y);
+	void	writeTile12(int x, int y);
+	bool	isTileIdAtXY(short tileId, int x, int y);
+	VPoint	searchTile(int seedX, int seedY, short tileId);
 
 	bool static sortEdgesByX (const VEdge *edge1, const VEdge *edge2)
 	{

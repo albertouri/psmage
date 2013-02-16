@@ -278,11 +278,27 @@
 				Name="Converter"
 				>
 				<File
+					RelativePath=".\Source\MapFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\MapFile.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\MapFormat.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\Source\MapFormat.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\UnitFormat.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\UnitFormat.h"
 					>
 				</File>
 			</Filter>
